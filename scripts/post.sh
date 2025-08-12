@@ -30,7 +30,13 @@ if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
   if [[ -r /proc/meminfo ]]; then
     MEM_TOTAL_MB="$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo 2>/dev/null || echo 0)"
     MEM_AVAILABLE_MB="$(awk '/MemAvailable/ {print int($2/1024)}' /proc/meminfo 2>/dev/null || echo 0)"
-    MEM_USAGE=$(( (MEM_TOTAL_MB - MEM_AVAILABLE_MB) * 100 / MEM_TOTAL_MB ))
+    if [[ $MEM_TOTAL_MB -gt 0 ]]; then
+      MEM_USAGE=$(( (MEM_TOTAL_MB - MEM_AVAILABLE_MB) * 100 / MEM_TOTAL_MB ))
+    else
+      MEM_USAGE=0
+    fi
+  else
+    MEM_AVAILABLE_MB=0
   fi
   
   # Disk information
@@ -43,7 +49,8 @@ if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
   
   # Process CPU time
   if [[ -r /proc/$$/stat ]]; then
-    CPU_TIME=$(awk '{print $14+$15}' /proc/$$/stat 2>/dev/null | awk '{printf "%.2f", $1/100}' || echo 0)
+    CPU_TIME_RAW=$(awk '{print $14+$15}' /proc/$$/stat 2>/dev/null || echo 0)
+    CPU_TIME=$((CPU_TIME_RAW / 100))  # Convert to seconds (integer)
   fi
   
   # Memory peak usage
@@ -70,6 +77,10 @@ fi
 # Calculate carbon footprint estimate
 CARBON_FOOTPRINT=0
 ENERGY_CONSUMPTION=0
+TOTAL_POWER_W=0
+ENERGY_MIX="unknown"
+ENERGY_MIX_FACTOR=0
+RUNNER_TYPE="unknown"
 
 if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
   log "🌱 Calculating carbon footprint estimate..."
@@ -78,12 +89,12 @@ if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
   if [[ "$RUNNER_NAME" == *"github-hosted"* ]] || [[ "$RUNNER_NAME" == *"ubuntu-latest"* ]] || [[ "$RUNNER_NAME" == *"windows-latest"* ]] || [[ "$RUNNER_NAME" == *"macos-latest"* ]]; then
     RUNNER_TYPE="github-hosted"
     ENERGY_MIX="renewable"  # GitHub's claim
-    ENERGY_MIX_FACTOR=0.1   # Lower carbon factor for renewable energy
+    ENERGY_MIX_FACTOR=1   # Lower carbon factor for renewable energy (multiply by 0.1 later)
     BASE_POWER_W=50         # Base power consumption in watts
   else
     RUNNER_TYPE="self-hosted"
     ENERGY_MIX="grid"
-    ENERGY_MIX_FACTOR=0.5   # Higher carbon factor for grid energy
+    ENERGY_MIX_FACTOR=5   # Higher carbon factor for grid energy (multiply by 0.1 later)
     BASE_POWER_W=100        # Higher base power for self-hosted
   fi
   
@@ -103,7 +114,7 @@ if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
   # Calculate carbon footprint (gCO2e)
   # Carbon = Energy × Energy Mix Factor × Carbon Intensity
   CARBON_INTENSITY=400  # gCO2e/kWh (typical data center)
-  CARBON_FOOTPRINT=$((ENERGY_CONSUMPTION * ENERGY_MIX_FACTOR * CARBON_INTENSITY / 1000))
+  CARBON_FOOTPRINT=$((ENERGY_CONSUMPTION * ENERGY_MIX_FACTOR * CARBON_INTENSITY / 10000))  # Divide by 10000 to account for 0.1 factor
   
   log "⚡ Power consumption: ${TOTAL_POWER_W}W total"
   log "   • CPU: ${CPU_POWER_W}W"
@@ -126,9 +137,12 @@ DURATION_MINUTES=$((DURATION_SECONDS / 60))
 log "⏱️  Pipeline completed in ${DURATION_SECONDS}s (${DURATION_MINUTES}m)"
 
 # Recalculate carbon footprint with actual duration
+ACTUAL_ENERGY_CONSUMPTION=0
+ACTUAL_CARBON_FOOTPRINT=0
+
 if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
   ACTUAL_ENERGY_CONSUMPTION=$((TOTAL_POWER_W * DURATION_SECONDS / 3600))
-  ACTUAL_CARBON_FOOTPRINT=$((ACTUAL_ENERGY_CONSUMPTION * ENERGY_MIX_FACTOR * CARBON_INTENSITY / 1000))
+  ACTUAL_CARBON_FOOTPRINT=$((ACTUAL_ENERGY_CONSUMPTION * ENERGY_MIX_FACTOR * 400 / 10000))  # 400 gCO2e/kWh, divide by 10000 for 0.1 factor
   
   log "🌍 Final carbon footprint: ${ACTUAL_CARBON_FOOTPRINT}g CO2e"
   log "   • Energy consumed: ${ACTUAL_ENERGY_CONSUMPTION}Wh"
