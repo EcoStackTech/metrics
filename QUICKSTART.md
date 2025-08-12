@@ -1,133 +1,121 @@
-# Quick Start Guide
+# 🚀 EcoStack Metrics - Quick Start Guide
 
-Get up and running with EcoStack metrics in under 5 minutes!
+> **Get up and running with EcoStack Metrics in under 5 minutes!**
 
-## 🚀 Repository Level Setup
+## ⚡ Super Quick Start
 
 ### 1. Add to Your Workflow
 
-Add this step to any GitHub Actions workflow:
-
 ```yaml
-- name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v1
-  # No configuration needed - works out of the box!
-```
-
-### 2. That's It! 🎉
-
-The action will automatically collect and send metrics to EcoStack's hosted API. Authentication is handled automatically based on your repository.
-
-## 🌱 Carbon Footprint Measurement
-
-Your action now measures the environmental impact of CI/CD pipelines:
-
-- **Pipeline Duration**: Execution time from start to finish
-- **Resource Usage**: CPU, memory, and disk consumption
-- **Energy Consumption**: Power usage in watt-hours
-- **Carbon Emissions**: CO2 impact in grams based on energy mix
-
-### Example Output
-```
-Pipeline completed with carbon footprint: 5g CO2e
-Duration: 5m, Energy: 25Wh, Runner: github-hosted (renewable)
-```
-
-## 🏢 Organization Level Setup
-
-### 1. Create Template Workflow
-
-Create `.github/workflows/ecostack-metrics.yml` in your organization:
-
-```yaml
-name: EcoStack Metrics Collection
-on:
-  workflow_call:
-    inputs:
-      include_system_stats:
-        required: false
-        type: string
-        default: "true"
-
 jobs:
-  collect-metrics:
+  build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      
+      # Your build steps here...
+      - run: echo "Building..."
+      
+      # 🌱 Measure Carbon Footprint (place at the end!)
       - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v1
-        with:
-          include_system_stats: ${{ inputs.include_system_stats }}
+        uses: EcoStackTech/metrics@v2.0.0
 ```
 
-### 2. Use in Repositories
+**That's it!** The action will automatically:
+- ✅ Measure your pipeline's carbon footprint
+- ✅ Track resource usage and efficiency
+- ✅ Send metrics to EcoStack API
+- ✅ Provide environmental impact insights
 
-In any repository, call it like:
+## 🎯 Best Practices
 
+### **Place at the End** ⭐
+```yaml
+# ✅ RECOMMENDED: Capture entire pipeline
+- name: Measure Carbon Footprint
+  uses: EcoStackTech/metrics@v2.0.0
+
+# ❌ AVOID: Only measures action time
+- name: Measure Carbon Footprint
+  uses: EcoStackTech/metrics@v2.0.0
+  # ... other steps after this
+```
+
+### **Enable Enhanced Features**
 ```yaml
 - name: Measure Carbon Footprint
-  uses: ./.github/workflows/ecostack-metrics.yml
-  # Uses default EcoStack API automatically
+  uses: EcoStackTech/metrics@v2.0.0
+  with:
+    include_system_stats: true      # Resource monitoring
+    capture_pipeline_metrics: true  # Pipeline duration tracking
 ```
-
-## 📊 What Gets Collected
-
-- **Runner Info**: Name, OS, architecture, labels, type
-- **Workflow Context**: Repository, workflow, job, actor
-- **System Stats**: CPU cores, memory, disk (Linux)
-- **Performance Metrics**: Duration, CPU usage, memory consumption
-- **Carbon Footprint**: Energy consumption and CO2 emissions
-- **Event Details**: Push, PR, workflow dispatch info
 
 ## 🔧 Configuration Options
 
 | Input | Description | Default |
 |-------|-------------|---------|
-| `include_system_stats` | Collect system metrics and carbon footprint | `true` |
+| `include_system_stats` | Collect CPU/memory/disk metrics | `true` |
+| `capture_pipeline_metrics` | Track true pipeline duration | `true` |
 
-## 🔐 Authentication
+## 📊 What You'll Get
 
-**No API keys needed!** EcoStack automatically authenticates based on:
-- Repository name (e.g., "owner/repo")
-- Organization membership
-- Access control managed on EcoStack's side
+### 🌱 Carbon Footprint
+- Energy consumption in Watt-hours
+- CO2 emissions in grams
+- Environmental impact context
 
-## 🧪 Test Your Setup
+### ⏱️ Performance Metrics
+- Total pipeline duration
+- Resource utilization
+- Efficiency insights
 
-Run the test script locally:
+### 📈 System Resources
+- CPU usage and load averages
+- Memory consumption
+- Disk and network I/O
 
-```bash
-./scripts/test.sh https://api.ecostack.tech/metric
+## 🚀 Advanced Usage
+
+### Organization-Wide Setup
+1. Install the EcoStack app in your organization
+2. Grant access to repositories
+3. Use the organization template:
+
+```yaml
+- name: Use EcoStack Metrics
+  uses: ./.github/workflows/ecostack-metrics.yml
+  with:
+    include_system_stats: true
+    capture_pipeline_metrics: true
 ```
 
-## 📚 Need More Help?
+### Conditional Collection
+```yaml
+- name: Measure Carbon Footprint
+  uses: EcoStackTech/metrics@v2.0.0
+  if: github.event_name == 'push'  # Only on pushes
+```
 
-- [Full Documentation](README.md)
-- [Organization Setup Guide](docs/organization-setup.md)
-- [Examples](examples/)
-- [Open an Issue](https://github.com/EcoStackTech/metrics/issues)
+## 🔍 Troubleshooting
 
-## 🎯 Common Use Cases
+**Common Issues:**
+- **High carbon footprint**: Review pipeline efficiency
+- **Missing metrics**: Ensure action is at the end of your workflow
+- **API errors**: Check repository permissions
 
-- **CI/CD Monitoring**: Track runner usage across workflows
-- **Cost Optimization**: Monitor resource utilization
-- **Performance Analysis**: Identify bottlenecks in your CI pipeline
-- **Carbon Footprint**: Measure environmental impact of pipelines
-- **Compliance**: Audit workflow execution across repositories
-- **Sustainability**: Track and reduce CI/CD carbon emissions
+**Need Help?**
+- 📖 [Full Documentation](README.md)
+- 🐛 [GitHub Issues](https://github.com/EcoStackTech/metrics/issues)
+- 💬 [Discussions](https://github.com/EcoStackTech/metrics/discussions)
 
-## 💡 Why Zero Configuration?
+## 🌟 What's New in v2.0.0
 
-- **Instant Setup**: No API keys or configuration required
-- **Hosted Solution**: EcoStack manages the infrastructure
-- **Always Available**: 99.9% uptime SLA
-- **Secure by Default**: Organization-based access control
-- **Scalable**: Handles any volume of metrics
-- **Environmentally Aware**: Built-in carbon footprint measurement
+- **🔍 True Pipeline Tracking**: Measures from commit to completion
+- **⚡ Enhanced Resource Monitoring**: Better CPU, memory, and network tracking
+- **🌱 Improved Carbon Footprint**: More accurate calculations
+- **📊 Better Insights**: Pipeline efficiency metrics
+- **🔄 Enhanced Reliability**: Better error handling
 
-## 🌍 Environmental Impact
+---
 
-Track your organization's CI/CD carbon footprint:
-- **GitHub-Hosted Runners**: Renewable energy, lower impact
-- **Self-Hosted Runners**: Grid energy, higher impact
-- **Resource Efficiency**: Optimize for lower energy consumption
-- **Sustainability Goals**: Set targets for reducing pipeline emissions
+**🌱 Ready to measure your environmental impact? Add the action to your workflow and start tracking sustainability today!**

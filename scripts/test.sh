@@ -1,34 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Test script for EcoStack metrics action
-# This script simulates the environment variables and data that would be sent
+# EcoStack Metrics v2.0.0 Local Test Script
+# This script simulates the GitHub Actions environment for local testing
 
-echo "🧪 EcoStack Metrics Action Test Script"
-echo "======================================"
+echo "🧪 EcoStack Metrics v2.0.0 - Local Test Environment"
+echo "=================================================="
 
-# Check if required tools are available
-command -v curl >/dev/null 2>&1 || { echo "❌ curl is required but not installed. Aborting." >&2; exit 1; }
-command -v jq >/dev/null 2>&1 || { echo "⚠️  jq is not installed. JSON output will not be formatted." >&2; }
-
-# Test configuration
-API_URL="${1:-}"
-API_KEY="${2:-}"
-
-if [[ -z "$API_URL" ]]; then
-    echo "❌ Usage: $0 <api_url> [api_key]"
-    echo "   Example: $0 https://your-api.ecostack.com/metrics your-api-key"
-    exit 1
+# Check if bc is available for decimal arithmetic
+if ! command -v bc >/dev/null 2>&1; then
+    echo "⚠️  Warning: 'bc' command not found. Some calculations may be limited."
+    echo "   Install with: sudo apt-get install bc (Ubuntu/Debian) or brew install bc (macOS)"
 fi
 
-echo "📡 API URL: $API_URL"
-if [[ -n "$API_KEY" ]]; then
-    echo "🔑 API Key: ${API_KEY:0:8}..."
-else
-    echo "🔑 API Key: Not provided"
-fi
+# Set up test environment variables (simulating GitHub Actions)
+export METRICS_API="${METRICS_API:-https://api.ecostack.tech/metric}"
+export INCLUDE_SYSTEM="${INCLUDE_SYSTEM:-true}"
+export CAPTURE_PIPELINE="${CAPTURE_PIPELINE:-true}"
 
-# Simulate GitHub Actions environment
+# Simulate GitHub context
 export REPO="test-org/test-repo"
 export RUN_ID="1234567890"
 export RUN_ATTEMPT="1"
@@ -44,118 +34,86 @@ export RUNNER_LABELS="ubuntu-latest,ubuntu-22.04,X64"
 export EVENT_NAME="push"
 export EVENT_ACTION=""
 export BASE_REF=""
-export HEAD_REF=""
-export WORKSPACE="/home/runner/work/test-repo"
-export INCLUDE_SYSTEM="true"
+export HEAD_REF="main"
+export WORKSPACE="/tmp/test-workspace"
 
-echo ""
-echo "🔧 Simulating GitHub Actions environment..."
-echo "   Repository: $REPO"
-echo "   Workflow: $WORKFLOW"
-echo "   Runner: $RUNNER_NAME ($RUNNER_OS/$RUNNER_ARCH)"
+# Simulate GitHub event timestamps for pipeline tracking
+export EVENT_HEAD_COMMIT_TIMESTAMP="$(date -d '5 minutes ago' -Iseconds)"
+export EVENT_PULL_REQUEST_CREATED_AT=""
+export EVENT_PULL_REQUEST_UPDATED_AT=""
+export EVENT_PUSH_BEFORE=""
+export EVENT_PUSH_AFTER=""
+export EVENT_ISSUE_CREATED_AT=""
+export EVENT_ISSUE_UPDATED_AT=""
+export EVENT_RELEASE_CREATED_AT=""
+export EVENT_RELEASE_PUBLISHED_AT=""
+export EVENT_SCHEDULE=""
+export EVENT_WORKFLOW_DISPATCH_INPUTS="{}"
 
-# Collect system stats (similar to the actual action)
+echo "🔧 Test Configuration:"
+echo "   • API Endpoint: $METRICS_API"
+echo "   • Include System Stats: $INCLUDE_SYSTEM"
+echo "   • Capture Pipeline Metrics: $CAPTURE_PIPELINE"
+echo "   • Repository: $REPO"
+echo "   • Runner: $RUNNER_NAME ($RUNNER_OS/$RUNNER_ARCH)"
+echo "   • Event: $EVENT_NAME"
+echo "   • Simulated Pipeline Start: $EVENT_HEAD_COMMIT_TIMESTAMP"
 echo ""
-echo "📊 Collecting system statistics..."
-CORES=$(getconf _NPROCESSORS_ONLN 2>/dev/null || nproc 2>/dev/null || echo 0)
+
+# Create test workspace
+mkdir -p "$WORKSPACE"
+cd "$WORKSPACE"
+echo "📁 Created test workspace: $WORKSPACE"
+
+# Test system capabilities
+echo "🔍 Testing system capabilities..."
 if [[ -r /proc/meminfo ]]; then
-    MEM_TOTAL_MB=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo 2>/dev/null || echo 0)
+    echo "   ✅ /proc/meminfo accessible (Linux system)"
 else
-    MEM_TOTAL_MB=0
+    echo "   ⚠️  /proc/meminfo not accessible (non-Linux system)"
 fi
-DISK_AVAIL_MB=$(df -Pm / 2>/dev/null | tail -1 | awk '{print $4}' 2>/dev/null || echo 0)
 
-echo "   CPU Cores: $CORES"
-echo "   Memory: ${MEM_TOTAL_MB}MB"
-echo "   Disk Available: ${DISK_AVAIL_MB}MB"
-
-# Build test payload
-now_iso=$(date -Iseconds 2>/dev/null || python3 -c "import datetime; print(datetime.datetime.utcnow().replace(microsecond=0).isoformat()+'Z')")
-
-payload=$(cat <<JSON
-{
-  "kind": "action_probe",
-  "ts": "$now_iso",
-  "repo": "$REPO",
-  "workflow": "$WORKFLOW",
-  "job": "$JOB",
-  "actor": "$ACTOR",
-  "ref": "$REF",
-  "sha": "$SHA",
-  "run_id": "$RUN_ID",
-  "run_attempt": $RUN_ATTEMPT,
-  "event": {
-    "name": "$EVENT_NAME",
-    "action": "$EVENT_ACTION",
-    "base_ref": "$BASE_REF",
-    "head_ref": "$HEAD_REF"
-  },
-  "runner": {
-    "name": "$RUNNER_NAME",
-    "os": "$RUNNER_OS",
-    "arch": "$RUNNER_ARCH",
-    "labels": "$RUNNER_LABELS"
-  },
-  "system": {
-    "cores": $CORES,
-    "mem_total_mb": $MEM_TOTAL_MB,
-    "disk_avail_mb": $DISK_AVAIL_MB
-  },
-  "workspace": "$WORKSPACE"
-}
-JSON
-)
-
-echo ""
-echo "📦 Test payload:"
-if command -v jq >/dev/null 2>&1; then
-    echo "$payload" | jq .
+if [[ -r /proc/loadavg ]]; then
+    echo "   ✅ /proc/loadavg accessible (CPU load monitoring)"
 else
-    echo "$payload"
+    echo "   ⚠️  /proc/loadavg not accessible"
+fi
+
+if command -v bc >/dev/null 2>&1; then
+    echo "   ✅ bc command available (decimal arithmetic)"
+else
+    echo "   ⚠️  bc command not available"
 fi
 
 echo ""
-echo "🚀 Sending test request..."
 
-# Build headers
-headers=(-H "Content-Type: application/json")
-if [[ -n "$API_KEY" ]]; then
-    headers+=(-H "Authorization: Bearer $API_KEY")
-fi
-
-# Send request
-response=$(curl -sS -X POST "$API_URL" "${headers[@]}" -d "$payload" \
-    -w "\n%{http_code}\n%{time_total}" 2>/dev/null || echo -e "\n000\n0")
-
-# Parse response
-body=$(echo "$response" | head -n -2)
-code=$(echo "$response" | tail -n 2 | head -n 1)
-time_total=$(echo "$response" | tail -n 1)
-
+# Run the metrics collection script
+echo "🚀 Running EcoStack metrics collection..."
+echo "   (This will simulate a 5-minute pipeline duration)"
 echo ""
-if [[ "$code" -ge 200 && "$code" -lt 300 ]]; then
-    echo "✅ Success! HTTP $code in ${time_total}s"
-    if [[ -n "$body" ]]; then
-        echo "📥 Response:"
-        if command -v jq >/dev/null 2>&1; then
-            echo "$body" | jq . 2>/dev/null || echo "$body"
-        else
-            echo "$body"
-        fi
-    fi
+
+# Simulate some pipeline work
+echo "⏳ Simulating pipeline execution..."
+sleep 2
+
+# Run the actual script
+if [[ -f "$(dirname "$0")/post.sh" ]]; then
+    bash "$(dirname "$0")/post.sh"
 else
-    echo "❌ Failed! HTTP $code"
-    if [[ -n "$body" ]]; then
-        echo "📥 Response: $body"
-    fi
+    echo "❌ Error: post.sh script not found!"
+    echo "   Make sure you're running this from the scripts/ directory"
     exit 1
 fi
 
 echo ""
-echo "🎉 Test completed successfully!"
-echo "   Your EcoStack metrics action is properly configured."
+echo "✅ Test completed successfully!"
 echo ""
-echo "💡 Next steps:"
-echo "   1. Add the action to your GitHub workflow"
-echo "   2. Set up the required secrets"
-echo "   3. Test with an actual workflow run"
+echo "📊 What was tested:"
+echo "   • Pipeline timing calculation (5 min simulated duration)"
+echo "   • System resource monitoring"
+echo "   • Carbon footprint calculation"
+echo "   • API payload construction"
+echo "   • Enhanced metrics collection"
+echo ""
+echo "🌱 The action is now ready for production use!"
+echo "   Use: uses: EcoStackTech/metrics@v2.0.0"

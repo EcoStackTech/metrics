@@ -1,201 +1,273 @@
-# Organization-Level Setup Guide
+# 🏢 Organization Setup Guide
 
-This guide explains how to set up the EcoStack metrics action at the organization level to automatically collect metrics from all repositories, including **carbon footprint measurement**.
+> **Set up EcoStack Metrics across your entire organization for comprehensive CI/CD monitoring and sustainability tracking**
 
-## Prerequisites
+## 🎯 Overview
 
-1. **Organization Admin Access**: You need admin access to your GitHub organization
-2. **EcoStack Access**: Your organization must be authorized in EcoStack (handled automatically)
+This guide will help you set up EcoStack Metrics at the organization level, allowing you to:
+- 📊 Monitor all repositories automatically
+- 🌱 Track organization-wide carbon footprint
+- ⚡ Standardize metrics collection
+- 🔐 Manage access centrally
+- 📈 Get organization-level insights
 
-## Step 1: Configure Organization Actions Settings
+## 🚀 Quick Setup
 
-1. Go to your organization's **Settings** page
-2. Click on **Actions** in the left sidebar
-3. Under **General**, ensure the following settings:
-   - **Actions permissions**: Select "Allow all actions and reusable workflows"
-   - **Workflow permissions**: Select "Allow GitHub Actions to create and approve pull requests"
-   - **Fork pull request workflows from outside collaborators**: Select "Require approval for first-time contributors"
+### 1. Install EcoStack App
 
-## Step 2: Create Organization Workflow Template
+1. Go to your organization's **Settings** → **Integrations** → **GitHub Apps**
+2. Click **Configure** next to **EcoStack Metrics**
+3. Select repositories to grant access to
+4. Click **Install**
 
-1. In your organization, create a new repository called `.github` (if it doesn't exist)
-2. Add the following workflow file: `.github/workflows/ecostack-metrics.yml`
+### 2. Configure Workflow Permissions
+
+1. Go to **Settings** → **Actions** → **General**
+2. Under **Workflow permissions**, select:
+   - ✅ "Allow GitHub Actions to create and approve pull requests"
+   - ✅ "Allow GitHub Actions to read and write permissions"
+3. Click **Save**
+
+### 3. Create Organization Template
+
+Create `.github/workflows/ecostack-metrics.yml` in your organization:
 
 ```yaml
-name: EcoStack Metrics Collection
-description: "Template workflow for collecting runner metrics across the organization"
-
+name: EcoStack Metrics Collection Template
 on:
   workflow_call:
     inputs:
       include_system_stats:
-        description: "Collect system statistics and carbon footprint"
+        description: 'Include system statistics and carbon footprint'
+        required: false
+        type: boolean
+        default: true
+      capture_pipeline_metrics:
+        description: 'Capture true pipeline duration and resource usage'
+        required: false
+        type: boolean
+        default: true
+      runner_type:
+        description: 'Type of runner to use'
         required: false
         type: string
-        default: "true"
+        default: 'ubuntu-latest'
 
 jobs:
   collect-metrics:
-    name: "Collect Runner Metrics"
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    runs-on: ${{ inputs.runner_type }}
+    timeout-minutes: 10
+    
+    permissions:
+      contents: read
+      id-token: write
     
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      # 🌱 MEASURE CARBON FOOTPRINT
       - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v1
+        uses: EcoStackTech/metrics@v2.0.0
         with:
           include_system_stats: ${{ inputs.include_system_stats }}
+          capture_pipeline_metrics: ${{ inputs.capture_pipeline_metrics }}
 ```
 
-## Step 3: Create Repository Template
+## 📋 Repository Usage
 
-Create a template repository that other repositories can copy from:
+### Basic Implementation
 
-1. Create a new repository in your organization
-2. Add the following workflow file: `.github/workflows/metrics.yml`
+In any repository, add this to your workflow:
 
 ```yaml
-name: Collect Metrics
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  metrics:
-    uses: ./.github/workflows/ecostack-metrics.yml
-    # Uses default EcoStack API automatically
+- name: Use EcoStack Metrics
+  uses: ./.github/workflows/ecostack-metrics.yml
+  with:
+    include_system_stats: true
+    capture_pipeline_metrics: true
 ```
 
-## Step 4: Enable in Individual Repositories
-
-For each repository where you want to collect metrics:
-
-### Option A: Copy Template Workflow
-
-1. Copy the `.github/workflows/metrics.yml` file to the repository
-2. That's it! No additional configuration needed
-
-### Option B: Use Organization Workflow
-
-1. Add the following workflow file: `.github/workflows/metrics.yml`
-
-```yaml
-name: Collect Metrics
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  metrics:
-    uses: your-org/.github/.github/workflows/ecostack-metrics.yml@main
-    # Uses default EcoStack API automatically
-```
-
-## Step 5: Test the Setup
-
-1. Make a small change to any repository with the workflow enabled
-2. Check the Actions tab to see if the metrics collection job runs
-3. Verify in your EcoStack dashboard that metrics are being received
-4. Check that carbon footprint data is being collected
-
-## Carbon Footprint Measurement
-
-### What Gets Measured
-
-- **Pipeline Duration**: Start time, end time, and total execution time
-- **Resource Consumption**: CPU usage, memory usage, disk I/O
-- **Energy Estimation**: Power consumption based on hardware specifications
-- **Carbon Impact**: CO2 emissions in grams based on energy mix and duration
-
-### Environmental Impact Tracking
-
-Track your organization's CI/CD carbon footprint across all repositories:
-
-- **GitHub-Hosted Runners**: Use renewable energy (lower carbon factor)
-- **Self-Hosted Runners**: Use grid energy (higher carbon factor)
-- **Resource Efficiency**: Monitor CPU and memory utilization
-- **Sustainability Goals**: Set targets for reducing pipeline emissions
-
-### Carbon Footprint Calculation
-
-The action calculates carbon footprint using this formula:
-
-```
-Carbon Footprint = (CPU Power + Memory Power + Base Power) × Duration × Energy Mix Factor × Carbon Intensity
-```
-
-This gives you accurate environmental impact data for compliance, reporting, and sustainability initiatives.
-
-## Advanced Configuration
-
-### Conditional Metrics Collection
-
-You can make metrics collection conditional based on various factors:
+### Advanced Implementation
 
 ```yaml
 jobs:
-  metrics:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/ecostack-metrics.yml
-    with:
-      include_system_stats: 'false'  # Skip system stats and carbon footprint
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Build application
+        run: npm run build
+      
+      # 🌱 Measure Carbon Footprint
+      - name: Use EcoStack Metrics
+        uses: ./.github/workflows/ecostack-metrics.yml
+        with:
+          include_system_stats: true
+          capture_pipeline_metrics: true
+          runner_type: ubuntu-latest
 ```
 
-### Batch Processing
+## 🔧 Configuration Options
 
-For repositories with many workflows, consider batching metrics:
+### Template Inputs
+
+| Input | Description | Default | Required |
+|-------|-------------|---------|----------|
+| `include_system_stats` | Collect CPU/memory/disk metrics | `true` | No |
+| `capture_pipeline_metrics` | Track true pipeline duration | `true` | No |
+| `runner_type` | Runner type for metrics collection | `ubuntu-latest` | No |
+
+### Repository-Level Overrides
+
+Repositories can override template defaults:
 
 ```yaml
-jobs:
-  metrics:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/ecostack-metrics.yml
-    with:
-      include_system_stats: 'true'  # Include carbon footprint data
+- name: Use EcoStack Metrics
+  uses: ./.github/workflows/ecostack-metrics.yml
+  with:
+    include_system_stats: false  # Override template default
+    capture_pipeline_metrics: true
+    runner_type: windows-latest  # Use different runner
 ```
 
-## Troubleshooting
+## 📊 Organization Dashboard
+
+### What You'll See
+
+- **Repository Overview**: All repositories using the action
+- **Carbon Footprint**: Organization-wide environmental impact
+- **Resource Usage**: Aggregate runner utilization
+- **Pipeline Efficiency**: Performance metrics across teams
+- **Trends**: Historical data and improvements
+
+### Key Metrics
+
+- **Total CO2 Emissions**: Combined impact of all pipelines
+- **Energy Consumption**: Total watt-hours used
+- **Runner Efficiency**: GitHub-hosted vs self-hosted usage
+- **Pipeline Duration**: Average execution times
+- **Resource Utilization**: CPU and memory efficiency
+
+## 🎯 Best Practices
+
+### 1. **Standardize Across Teams**
+```yaml
+# Use consistent naming and configuration
+- name: Measure Carbon Footprint
+  uses: ./.github/workflows/ecostack-metrics.yml
+  with:
+    include_system_stats: true
+    capture_pipeline_metrics: true
+```
+
+### 2. **Monitor Pipeline Efficiency**
+- Track action time vs. total pipeline time
+- Identify bottlenecks across repositories
+- Set organization-wide efficiency targets
+
+### 3. **Set Sustainability Goals**
+- Carbon footprint reduction targets
+- Energy efficiency improvements
+- Runner optimization strategies
+
+### 4. **Regular Reviews**
+- Monthly sustainability reports
+- Quarterly efficiency reviews
+- Annual carbon footprint assessments
+
+## 🔐 Security & Permissions
+
+### Required Permissions
+
+- **Contents**: Read access to repository code
+- **Actions**: Read workflow information
+- **Metadata**: Read repository metadata
+
+### Access Control
+
+- **Repository Level**: Individual repository access
+- **Organization Level**: Centralized management
+- **Team Level**: Group-based permissions
+
+## 📈 Scaling Considerations
+
+### Large Organizations
+
+- **Repository Limits**: Monitor API rate limits
+- **Data Retention**: Configure data storage policies
+- **Performance**: Optimize metrics collection timing
+
+### Multi-Region Teams
+
+- **Runner Distribution**: Use appropriate runner types
+- **Time Zones**: Consider local business hours
+- **Compliance**: Regional data requirements
+
+## 🔍 Troubleshooting
 
 ### Common Issues
 
-1. **Workflow not found**: Ensure the organization workflow template exists and is accessible
-2. **Permission denied**: Check organization Actions settings and repository permissions
-3. **Access denied**: Repository not authorized in EcoStack (contact support)
-4. **Carbon footprint not calculated**: Ensure `include_system_stats` is set to `true`
+**"Workflow not found"**
+- Ensure template is in organization's `.github/workflows/` directory
+- Check repository access to organization templates
+
+**"Permission denied"**
+- Verify workflow permissions are enabled
+- Check repository access settings
+
+**"Metrics not collected"**
+- Ensure action is placed at the end of workflows
+- Check `capture_pipeline_metrics` is enabled
 
 ### Debug Mode
 
-To debug issues, temporarily add logging to your workflow:
+Enable debug logging in repositories:
 
 ```yaml
-- name: Debug information
-  run: |
-    echo "Repository: ${{ github.repository }}"
-    echo "Event: ${{ github.event_name }}"
-    echo "Ref: ${{ github.ref }}"
-    echo "Actor: ${{ github.actor }}"
+env:
+  ACTIONS_STEP_DEBUG: true
 ```
 
-## Best Practices
+## 📚 Examples
 
-1. **Start Small**: Begin with a few key repositories before rolling out organization-wide
-2. **Monitor Usage**: Keep track of API usage and costs
-3. **Track Carbon Footprint**: Use the data to optimize resource usage
-4. **Set Sustainability Goals**: Establish targets for reducing pipeline emissions
-5. **Documentation**: Document the setup process for your team
-6. **Testing**: Test in staging environments before production deployment
+### Complete Organization Template
 
-## Support
+See [`examples/organization-template.yml`](../examples/organization-template.yml) for a comprehensive template with:
+- Pre-metrics setup
+- Post-metrics summary
+- Conditional notifications
+- Error handling
 
-If you encounter issues:
+### Repository Implementation
 
-1. Check the [GitHub Actions documentation](https://docs.github.com/en/actions)
-2. Review the [EcoStack metrics action documentation](../README.md)
-3. Open an issue in the EcoStack metrics repository
-4. Contact EcoStack support
+See [`examples/repository-usage.yml`](../examples/repository-usage.yml) for repository-level usage examples.
+
+## 🚀 Next Steps
+
+1. **Install the EcoStack app** in your organization
+2. **Create the metrics template** workflow
+3. **Add to key repositories** to start collecting data
+4. **Monitor your dashboard** for insights
+5. **Set sustainability goals** and track progress
+
+## 🌟 Benefits
+
+- **🌱 Environmental Impact**: Measure and reduce carbon footprint
+- **📊 Visibility**: Organization-wide CI/CD insights
+- **⚡ Efficiency**: Identify optimization opportunities
+- **🔐 Security**: Centralized access management
+- **📈 Scalability**: Grow with your organization
+
+---
+
+**🏢 Ready to transform your organization's CI/CD sustainability? Follow this guide and start measuring your environmental impact today!**

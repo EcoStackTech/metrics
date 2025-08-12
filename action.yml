@@ -10,7 +10,11 @@ inputs:
     required: false
     default: "https://api.ecostack.tech/metric"
   include_system_stats:
-    description: "Collect CPU/RAM/disk metrics (Linux best effort)"
+    description: "Collect CPU/RAM/disk metrics and carbon footprint calculation"
+    required: false
+    default: "true"
+  capture_pipeline_metrics:
+    description: "Capture true pipeline duration and resource usage (recommended: true)"
     required: false
     default: "true"
 runs:
@@ -32,6 +36,11 @@ runs:
           exit 1
         fi
         
+        if [[ "${{ inputs.capture_pipeline_metrics }}" != "true" && "${{ inputs.capture_pipeline_metrics }}" != "false" ]]; then
+          echo "Error: capture_pipeline_metrics must be 'true' or 'false'" >&2
+          exit 1
+        fi
+        
         echo "Configuration validation passed"
     
     - name: Collect Metrics & Calculate Carbon Footprint
@@ -39,6 +48,7 @@ runs:
       env:
         METRICS_API: ${{ inputs.api_url || 'https://api.ecostack.tech/metric' }}
         INCLUDE_SYSTEM: ${{ inputs.include_system_stats }}
+        CAPTURE_PIPELINE: ${{ inputs.capture_pipeline_metrics }}
         REPO: ${{ github.repository }}
         RUN_ID: ${{ github.run_id }}
         RUN_ATTEMPT: ${{ github.run_attempt }}
@@ -56,4 +66,16 @@ runs:
         BASE_REF: ${{ github.base_ref }}
         HEAD_REF: ${{ github.head_ref }}
         WORKSPACE: ${{ github.workspace }}
+        # Enhanced context for better pipeline tracking
+        EVENT_HEAD_COMMIT_TIMESTAMP: ${{ github.event.head_commit.timestamp }}
+        EVENT_PULL_REQUEST_CREATED_AT: ${{ github.event.pull_request.created_at }}
+        EVENT_PULL_REQUEST_UPDATED_AT: ${{ github.event.pull_request.updated_at }}
+        EVENT_PUSH_BEFORE: ${{ github.event.before }}
+        EVENT_PUSH_AFTER: ${{ github.event.after }}
+        EVENT_ISSUE_CREATED_AT: ${{ github.event.issue.created_at }}
+        EVENT_ISSUE_UPDATED_AT: ${{ github.event.issue.updated_at }}
+        EVENT_RELEASE_CREATED_AT: ${{ github.event.release.created_at }}
+        EVENT_RELEASE_PUBLISHED_AT: ${{ github.event.release.published_at }}
+        EVENT_SCHEDULE: ${{ github.event.schedule }}
+        EVENT_WORKFLOW_DISPATCH_INPUTS: ${{ toJSON(github.event.inputs) }}
       run: $GITHUB_ACTION_PATH/scripts/post.sh

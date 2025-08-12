@@ -1,34 +1,79 @@
-name: Example Repository Workflow
-description: "Example of how to use EcoStack metrics in a repository workflow"
-
+name: EcoStack Metrics Collection
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:  # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      include_system_stats:
+        description: 'Include system statistics and carbon footprint'
+        required: false
+        default: 'true'
+        type: boolean
+      capture_pipeline_metrics:
+        description: 'Capture true pipeline duration and resource usage'
+        required: false
+        default: 'true'
+        type: boolean
 
 jobs:
-  example-job:
+  build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run linting
+        run: npm run lint
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Build application
+        run: npm run build
+      
+      - name: Run security audit
+        run: npm audit --audit-level moderate
+      
+      # 🌱 MEASURE CARBON FOOTPRINT - Place at the end for best results!
       - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v1
-        # No configuration needed - uses default EcoStack API automatically
-        # Automatically measures pipeline duration, resource usage, and carbon footprint
-        # Optional: Add include_system_stats: 'false' to skip carbon footprint calculation
+        uses: EcoStackTech/metrics@v2.0.0
+        with:
+          include_system_stats: ${{ inputs.include_system_stats }}
+          capture_pipeline_metrics: ${{ inputs.capture_pipeline_metrics }}
+        # This action will:
+        # • Measure the entire pipeline duration (from commit to completion)
+        # • Calculate accurate carbon footprint based on real resource usage
+        # • Provide detailed insights into pipeline efficiency
+        # • Send metrics to EcoStack API automatically
+
+  # Example of conditional metrics collection
+  conditional-metrics:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-      - name: Your actual job steps
+      - name: Run deployment checks
         run: |
-          echo "Hello from ${{ github.repository }}"
-          echo "Running on ${{ runner.os }}"
-          echo "Workflow: ${{ github.workflow }}"
+          echo "Running deployment validation..."
+          sleep 30  # Simulate deployment checks
       
-      - name: Another example step
-        if: github.event_name == 'pull_request'
-        run: echo "This is a pull request from ${{ github.head_ref }} to ${{ github.base_ref }}"
+      - name: Measure Carbon Footprint
+        uses: EcoStackTech/metrics@v2.0.0
+        with:
+          include_system_stats: true
+          capture_pipeline_metrics: true
+        # Only runs on main branch pushes
+        # Captures deployment pipeline metrics

@@ -1,278 +1,274 @@
-# EcoStack Runner Metrics GitHub Action
+# EcoStack GitHub Actions Metrics
 
-A GitHub Action that collects and sends GitHub Actions runner metrics to your EcoStack API for monitoring, analytics, and **carbon footprint measurement**.
+> **🌱 Measure the environmental impact of your CI/CD pipelines with precision**
 
-## Features
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/EcoStackTech/metrics)](https://github.com/EcoStackTech/metrics/releases)
+[![GitHub license](https://img.shields.io/github/license/EcoStackTech/metrics)](https://github.com/EcoStackTech/metrics/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/EcoStackTech/metrics)](https://github.com/EcoStackTech/metrics/issues)
 
-- **Runner Information**: Collects runner name, OS, architecture, and labels
-- **Workflow Context**: Captures workflow, job, repository, and actor details
-- **System Metrics**: Optional collection of CPU cores, memory, and disk space (Linux)
-- **Pipeline Performance**: Measures execution duration, CPU usage, and memory consumption
-- **Carbon Footprint**: Calculates environmental impact based on resource consumption and energy mix
-- **Zero Configuration**: Works out of the box with EcoStack's hosted API
-- **Organization-Based Access**: Authentication handled automatically based on repository
-- **Non-blocking**: Metrics collection won't fail your workflow
+## 🚀 What's New in v2.0.0
 
-## Usage
+**Enhanced Pipeline-Level Metrics** - Now captures true pipeline duration and resource usage, not just action execution time!
 
-### Repository Level
+### ✨ Key Improvements
+- **🔍 True Pipeline Tracking**: Measures from commit/PR creation to completion
+- **⚡ Enhanced Resource Monitoring**: CPU load averages, detailed memory breakdown, network I/O
+- **🌱 Improved Carbon Footprint**: More accurate calculations with real pipeline duration
+- **📊 Better Insights**: Pipeline efficiency metrics and environmental impact context
+- **🔄 Enhanced Reliability**: Better error handling and retry logic
 
-Add this step to your GitHub Actions workflow:
+## 📖 Overview
+
+EcoStack Metrics is a GitHub Action that automatically collects comprehensive metrics about your GitHub Actions runners and calculates the carbon footprint of your CI/CD pipelines. Perfect for organizations committed to sustainability and efficiency.
+
+### 🌟 Features
+
+- **🔋 Carbon Footprint Calculation**: Measure CO2 emissions from your pipelines
+- **⚡ Resource Monitoring**: CPU, memory, disk, and network usage tracking
+- **⏱️ Pipeline Duration**: True pipeline execution time measurement
+- **🌿 Energy Mix Awareness**: Different calculations for renewable vs. grid energy
+- **📊 Comprehensive Metrics**: Detailed system and performance data
+- **🔐 Organization-Level**: Install once, monitor all repositories
+- **🚀 Zero Configuration**: Works out of the box with sensible defaults
+
+## 🚀 Quick Start
+
+### Basic Usage
 
 ```yaml
-- name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v1
-  with:
-    include_system_stats: 'true'  # Optional, defaults to true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build application
+        run: |
+          echo "Building..."
+          sleep 30
+      
+      # Place at the end to capture true pipeline metrics
+      - name: Measure Carbon Footprint
+        uses: EcoStackTech/metrics@v2.0.0
 ```
 
-**That's it!** The action will automatically use EcoStack's hosted API and authenticate based on your repository.
+### Advanced Usage
 
-### Organization Level
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Build application
+        run: npm run build
+      
+      # Enhanced metrics with custom configuration
+      - name: Measure Carbon Footprint
+        uses: EcoStackTech/metrics@v2.0.0
+        with:
+          include_system_stats: true
+          capture_pipeline_metrics: true
+```
 
-Install the action at the organization level to automatically collect metrics from all repositories:
-
-1. Go to your organization's **Settings** → **Actions** → **General**
-2. Under "Workflow permissions", select "Allow GitHub Actions to create and approve pull requests"
-3. Add the action to your organization's workflow templates
-
-## Inputs
+## 📋 Inputs
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `include_system_stats` | Collect CPU/RAM/disk metrics and carbon footprint | No | `true` |
+| `include_system_stats` | Collect CPU/RAM/disk metrics and carbon footprint | `false` | `true` |
+| `capture_pipeline_metrics` | Capture true pipeline duration and resource usage | `false` | `true` |
 
-## Authentication
+> **Note**: The `api_url` input is available for internal development but not documented for end-users.
 
-**No API keys required!** EcoStack automatically authenticates requests based on:
+## 📊 Metrics Collected
 
-- **Repository**: `github.repository` (e.g., "owner/repo")
-- **Organization**: Extracted from repository name
-- **Access Control**: Managed on EcoStack's side
+### 🏃‍♂️ Runner Information
+- Runner name, OS, architecture, and labels
+- Runner type (GitHub-hosted vs self-hosted)
+- Energy efficiency classification
 
-This means companies can start using your action immediately without any setup or configuration.
+### ⚡ System Resources
+- **CPU**: Cores, usage percentage, load averages (1min, 5min, 15min)
+- **Memory**: Total, available, used, buffered, cached, peak usage
+- **Disk**: Total, used, available space, I/O operations
+- **Network**: Bytes received/sent
 
-## Environment Variables
+### ⏱️ Performance Metrics
+- **Pipeline Duration**: From commit/PR creation to completion
+- **Action Duration**: Time spent in the metrics action
+- **Efficiency Ratio**: Action time vs. total pipeline time
 
-The action automatically provides these environment variables to your API:
+### 🌱 Carbon Footprint
+- **Energy Consumption**: Watt-hours based on actual resource usage
+- **Carbon Emissions**: Grams of CO2 equivalent
+- **Energy Mix**: Renewable vs. grid energy factors
+- **Environmental Impact**: Contextual comparisons (phone charging, laptop usage, etc.)
 
-- `REPO`: Repository name (e.g., "owner/repo")
-- `WORKFLOW`: Workflow name
-- `JOB`: Job name
-- `ACTOR`: User who triggered the workflow
-- `REF`: Git reference (branch/tag)
-- `SHA`: Commit SHA
-- `RUN_ID`: Unique run identifier
-- `RUN_ATTEMPT`: Run attempt number
-- `RUNNER_NAME`: Runner name
-- `RUNNER_OS`: Runner operating system
-- `RUNNER_ARCH`: Runner architecture
-- `RUNNER_LABELS`: Runner labels
+## 🔧 Installation
 
-## Carbon Footprint Measurement
+### Repository Level
 
-### What Gets Measured
+1. Add the action to your workflow file (see Quick Start above)
+2. The action will automatically authenticate based on your repository
 
-- **Pipeline Duration**: Start time, end time, and total execution time
-- **Resource Consumption**: CPU usage, memory usage, disk I/O
-- **Energy Estimation**: Power consumption based on hardware specifications
-- **Carbon Impact**: CO2 emissions in grams based on energy mix and duration
+### Organization Level
 
-### Carbon Footprint Calculation
+1. Go to your organization's **Settings** → **Actions** → **General**
+2. Under **Workflow permissions**, select "Allow GitHub Actions to create and approve pull requests"
+3. Install the EcoStack Metrics app from the GitHub Marketplace
+4. Grant access to repositories you want to monitor
 
-The action calculates carbon footprint using this formula:
+## 📈 API Response Format
 
-```
-Carbon Footprint = (CPU Power + Memory Power + Base Power) × Duration × Energy Mix Factor × Carbon Intensity
-```
-
-- **GitHub-Hosted Runners**: Use renewable energy (lower carbon factor)
-- **Self-Hosted Runners**: Use grid energy (higher carbon factor)
-- **Hardware Efficiency**: Accounts for CPU cores, memory, and runner type
-
-### Example Carbon Footprint Output
+The action sends a comprehensive JSON payload to your API:
 
 ```json
 {
-  "carbon_footprint": {
-    "energy_consumption_wh": 25,
-    "carbon_emissions_gco2e": 5,
-    "energy_mix": "renewable",
-    "energy_mix_factor": 0.1,
-    "total_power_watts": 75,
-    "runner_efficiency": "github-hosted"
-  }
-}
-```
-
-## Example Workflows
-
-### Basic Usage (Zero Configuration)
-
-```yaml
-name: Example Workflow
-on: [push, pull_request]
-
-jobs:
-  example:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v1
-        # No configuration needed - uses default EcoStack API
-      
-      - name: Your actual job steps
-        run: echo "Hello World"
-```
-
-### With Conditional Metrics
-
-```yaml
-name: Conditional Metrics
-on: [push, pull_request]
-
-jobs:
-  example:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v1
-        if: github.event_name == 'push'  # Only on push events
-        with:
-          include_system_stats: 'false'  # Skip system stats and carbon footprint
-      
-      - name: Your actual job steps
-        run: echo "Hello World"
-```
-
-### Organization Template
-
-Create `.github/workflows/ecostack-metrics.yml` in your organization:
-
-```yaml
-name: EcoStack Metrics Collection
-on:
-  workflow_call:
-    inputs:
-      include_system_stats:
-        required: false
-        type: string
-        default: "true"
-
-jobs:
-  collect-metrics:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v1
-        with:
-          include_system_stats: ${{ inputs.include_system_stats }}
-```
-
-Then in any repository, call it like:
-
-```yaml
-- name: Measure Carbon Footprint
-  uses: ./.github/workflows/ecostack-metrics.yml
-  # Uses default EcoStack API automatically
-```
-
-## API Payload Format
-
-The action sends a comprehensive JSON payload with carbon footprint data:
-
-```json
-{
-  "kind": "action_probe",
+  "kind": "enhanced_action_probe",
   "ts": "2024-01-15T10:30:00Z",
   "repo": "owner/repo",
   "workflow": "CI",
   "job": "build",
-  "actor": "username",
-  "ref": "refs/heads/main",
-  "sha": "abc123...",
-  "run_id": "1234567890",
-  "run_attempt": 1,
   "runner": {
     "name": "ubuntu-latest",
+    "type": "github-hosted",
     "os": "Linux",
-    "arch": "X64",
-    "labels": "ubuntu-latest,ubuntu-22.04,X64",
-    "type": "github-hosted"
+    "arch": "X64"
+  },
+  "performance": {
+    "pipeline_duration_seconds": 1800,
+    "pipeline_duration_minutes": 30,
+    "action_duration_seconds": 5,
+    "action_duration_minutes": 0
+  },
+  "carbon_footprint": {
+    "energy_consumption_wh": 25,
+    "carbon_emissions_gco2e": 125,
+    "energy_mix": "renewable",
+    "renewable_percentage": 100
   },
   "system": {
     "cores": 2,
     "mem_total_mb": 7168,
-    "mem_available_mb": 5120,
-    "mem_usage_percent": 29,
-    "mem_peak_mb": 1024,
-    "disk_avail_mb": 14000,
-    "disk_io_bytes": 1048576
-  },
-  "performance": {
-    "start_time": "2024-01-15T10:25:00Z",
-    "end_time": "2024-01-15T10:30:00Z",
-    "duration_seconds": 300,
-    "duration_minutes": 5,
-    "cpu_usage_percent": 45,
-    "cpu_time_seconds": 135.5
-  },
-  "carbon_footprint": {
-    "energy_consumption_wh": 25,
-    "carbon_emissions_gco2e": 5,
-    "energy_mix": "renewable",
-    "energy_mix_factor": 0.1,
-    "total_power_watts": 75,
-    "runner_efficiency": "github-hosted"
+    "cpu_usage_percent": 45
   }
 }
 ```
 
-## Security
+## 🌍 Carbon Footprint Calculation
 
-- **No API keys stored** - Authentication handled server-side
-- **Repository-based access control** - Only authorized repos can send metrics
-- **HTTPS only** - All communication encrypted
-- **Non-blocking** - Failed API calls don't fail your workflow
-- **Organization isolation** - Metrics are properly scoped
+### Formula
+```
+Carbon Footprint = Energy × Energy Mix Factor × Carbon Intensity
+```
 
-## Troubleshooting
+### Energy Mix Factors
+- **GitHub-hosted runners**: 0.1 (100% renewable energy)
+- **Self-hosted runners**: 0.5 (grid energy mix)
+- **Unknown runners**: 0.3 (conservative estimate)
+
+### Carbon Intensity
+- **Renewable**: 50 gCO2e/kWh
+- **Grid**: 400 gCO2e/kWh
+- **Mixed**: 200 gCO2e/kWh
+
+## 🎯 Best Practices
+
+### 1. **Place at the End** ⭐
+```yaml
+# ✅ Recommended: Capture entire pipeline
+- name: Measure Carbon Footprint
+  uses: EcoStackTech/metrics@v2.0.0
+
+# ❌ Avoid: Only measures action time
+- name: Measure Carbon Footprint
+  uses: EcoStackTech/metrics@v2.0.0
+  # ... other steps after this
+```
+
+### 2. **Enable Enhanced Metrics**
+```yaml
+- name: Measure Carbon Footprint
+  uses: EcoStackTech/metrics@v2.0.0
+  with:
+    include_system_stats: true      # Resource monitoring
+    capture_pipeline_metrics: true  # Pipeline duration tracking
+```
+
+### 3. **Monitor Pipeline Efficiency**
+- Track the ratio of action time to total pipeline time
+- Identify bottlenecks and optimization opportunities
+- Set carbon footprint targets for your team
+
+## 🔍 Troubleshooting
 
 ### Common Issues
 
-1. **Access denied**: Repository not authorized in EcoStack
-2. **API endpoint not reachable**: Check your network connectivity
-3. **System stats not collected**: System stats are Linux-only and require `/proc` access
-4. **Carbon footprint not calculated**: Ensure `include_system_stats` is set to `true`
+**"Resource not accessible by integration"**
+- Ensure the action has `contents: write` permissions
+- Check that the repository is accessible to the action
+
+**"Could not determine pipeline start time"**
+- This is normal for some event types
+- The action will fall back to action duration measurement
+
+**High carbon footprint values**
+- Review your pipeline efficiency
+- Consider using GitHub-hosted runners (100% renewable)
+- Optimize build times and resource usage
 
 ### Debug Mode
 
-To see what data is being sent, you can temporarily modify the script to log the payload:
+Enable debug logging by setting the `ACTIONS_STEP_DEBUG` secret to `true` in your repository.
+
+## 📚 Examples
+
+See the [`examples/`](examples/) directory for complete workflow templates:
+
+- [`repository-usage.yml`](examples/repository-usage.yml) - Basic repository setup
+- [`organization-template.yml`](examples/organization-template.yml) - Organization-wide template
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development
 
 ```bash
-# In scripts/post.sh, add this line before the curl command:
-echo "Sending payload: $payload" >&2
+# Clone the repository
+git clone https://github.com/EcoStackTech/metrics.git
+cd metrics
+
+# Test locally
+./scripts/test.sh
+
+# Make changes and test
+# Submit a pull request
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 🌟 Support
 
-For support and questions:
-- Open an issue on GitHub
-- Contact EcoStack support
-- Check the [documentation](https://docs.ecostack.com)
+- **Documentation**: [docs/](docs/)
+- **Issues**: [GitHub Issues](https://github.com/EcoStackTech/metrics/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/EcoStackTech/metrics/discussions)
+
+## 🙏 Acknowledgments
+
+- GitHub for providing renewable energy for hosted runners
+- The open source community for sustainability tools
+- All contributors helping measure and reduce CI/CD environmental impact
+
+---
+
+**🌱 Together, let's build a more sustainable future, one pipeline at a time!**
