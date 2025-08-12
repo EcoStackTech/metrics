@@ -84,7 +84,48 @@ fi
 # Initialize resource monitoring variables
 CPU_USAGE=0; CPU_TIME=0; MEM_USAGE=0; MEM_PEAK=0; DISK_IO=0
 CORES=0; MEM_TOTAL_MB=0; MEM_AVAILABLE_MB=0; DISK_AVAIL_MB=0
-CPU_LOAD_1MIN=0; CPU_LOAD_5MIN=0; CPU_LOAD_15min=0
+CPU_LOAD_1MIN=0; CPU_LOAD_5MIN=0; CPU_LOAD_15MIN=0
+
+# Initialize additional system variables
+MEM_BUFFERED_MB=0; MEM_CACHED_MB=0; DISK_TOTAL_MB=0; DISK_USED_MB=0
+DISK_IO_READ=0; DISK_IO_WRITE=0; NET_IO_RX=0; NET_IO_TX=0
+
+# Initialize GitHub context variables (with defaults for local testing)
+REPO="${REPO:-test-org/test-repo}"
+RUN_ID="${RUN_ID:-1234567890}"
+RUN_ATTEMPT="${RUN_ATTEMPT:-1}"
+WORKFLOW="${WORKFLOW:-Test Workflow}"
+JOB="${JOB:-test-job}"
+ACTOR="${ACTOR:-test-user}"
+REF="${REF:-refs/heads/main}"
+SHA="${SHA:-abc123def456789}"
+RUNNER_NAME="${RUNNER_NAME:-ubuntu-latest}"
+RUNNER_OS="${RUNNER_OS:-Linux}"
+RUNNER_ARCH="${RUNNER_ARCH:-X64}"
+RUNNER_LABELS="${RUNNER_LABELS:-ubuntu-latest,ubuntu-22.04,X64}"
+EVENT_NAME="${EVENT_NAME:-push}"
+EVENT_ACTION="${EVENT_ACTION:-}"
+BASE_REF="${BASE_REF:-}"
+HEAD_REF="${HEAD_REF:-main}"
+WORKSPACE="${WORKSPACE:-/tmp/test-workspace}"
+
+# Initialize event timestamp variables (with defaults for local testing)
+EVENT_HEAD_COMMIT_TIMESTAMP="${EVENT_HEAD_COMMIT_TIMESTAMP:-}"
+EVENT_PULL_REQUEST_CREATED_AT="${EVENT_PULL_REQUEST_CREATED_AT:-}"
+EVENT_PULL_REQUEST_UPDATED_AT="${EVENT_PULL_REQUEST_UPDATED_AT:-}"
+EVENT_PUSH_BEFORE="${EVENT_PUSH_BEFORE:-}"
+EVENT_PUSH_AFTER="${EVENT_PUSH_AFTER:-}"
+EVENT_ISSUE_CREATED_AT="${EVENT_ISSUE_CREATED_AT:-}"
+EVENT_ISSUE_UPDATED_AT="${EVENT_ISSUE_UPDATED_AT:-}"
+EVENT_RELEASE_CREATED_AT="${EVENT_RELEASE_CREATED_AT:-}"
+EVENT_RELEASE_PUBLISHED_AT="${EVENT_RELEASE_PUBLISHED_AT:-}"
+EVENT_SCHEDULE="${EVENT_SCHEDULE:-}"
+EVENT_WORKFLOW_DISPATCH_INPUTS="${EVENT_WORKFLOW_DISPATCH_INPUTS:-{}}"
+
+# Initialize action configuration variables (with defaults for local testing)
+METRICS_API="${METRICS_API:-https://api.ecostack.tech/metric}"
+INCLUDE_SYSTEM="${INCLUDE_SYSTEM:-true}"
+CAPTURE_PIPELINE="${CAPTURE_PIPELINE:-true}"
 
 if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
     log "📊 Collecting enhanced system statistics..." "INFO"
@@ -94,7 +135,7 @@ if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
     
     # CPU load averages (more accurate than single top command)
     if [[ -r /proc/loadavg ]]; then
-        read -r CPU_LOAD_1MIN CPU_LOAD_5MIN CPU_LOAD_15min rest < /proc/loadavg 2>/dev/null || true
+        read -r CPU_LOAD_1MIN CPU_LOAD_5MIN CPU_LOAD_15MIN rest < /proc/loadavg 2>/dev/null || true
         # Convert load average to percentage (load per core)
         if [[ $CORES -gt 0 ]]; then
             CPU_USAGE=$(echo "scale=0; $CPU_LOAD_1MIN * 100 / $CORES" | bc 2>/dev/null || echo 0)
@@ -152,7 +193,7 @@ if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
     
     log "✅ Enhanced system stats collected:" "SUCCESS"
     log "   • CPU: $CORES cores (${CPU_USAGE}% load)" "INFO"
-    log "   • Load averages: ${CPU_LOAD_1min}, ${CPU_LOAD_5min}, ${CPU_LOAD_15min}" "INFO"
+    log "   • Load averages: ${CPU_LOAD_1MIN}, ${CPU_LOAD_5MIN}, ${CPU_LOAD_15MIN}" "INFO"
     log "   • Memory: ${MEM_TOTAL_MB}MB total (${MEM_USAGE}% used)" "INFO"
     log "   • Memory breakdown: ${MEM_BUFFERED_MB}MB buffered, ${MEM_CACHED_MB}MB cached" "INFO"
     log "   • Disk: ${DISK_USED_MB}MB used, ${DISK_AVAIL_MB}MB available (${DISK_TOTAL_MB}MB total)" "INFO"
@@ -370,20 +411,20 @@ payload=$(cat <<JSON
     "net_io_rx_bytes": $NET_IO_RX,
     "net_io_tx_bytes": $NET_IO_TX
   },
-  "performance": {
-    "pipeline_start_time": "$PIPELINE_START_ISO",
-    "action_start_time": "$ACTION_START_ISO",
-    "action_end_time": "$ACTION_END_ISO",
-    "pipeline_duration_seconds": $TOTAL_PIPELINE_DURATION,
-    "pipeline_duration_minutes": $TOTAL_PIPELINE_MINUTES,
-    "action_duration_seconds": $ACTION_DURATION_SECONDS,
-    "action_duration_minutes": $ACTION_DURATION_MINUTES,
-    "cpu_usage_percent": $CPU_USAGE,
-    "cpu_time_seconds": $CPU_TIME,
-    "cpu_load_1min": $CPU_LOAD_1min,
-    "cpu_load_5min": $CPU_LOAD_5min,
-    "cpu_load_15min": $CPU_LOAD_15min
-  },
+      "performance": {
+      "pipeline_start_time": "$PIPELINE_START_ISO",
+      "action_start_time": "$ACTION_START_ISO",
+      "action_end_time": "$ACTION_END_ISO",
+      "pipeline_duration_seconds": $TOTAL_PIPELINE_DURATION,
+      "pipeline_duration_minutes": $TOTAL_PIPELINE_MINUTES,
+      "action_duration_seconds": $ACTION_DURATION_SECONDS,
+      "action_duration_minutes": $ACTION_DURATION_MINUTES,
+      "cpu_usage_percent": $CPU_USAGE,
+      "cpu_time_seconds": $CPU_TIME,
+      "cpu_load_1min": $CPU_LOAD_1MIN,
+      "cpu_load_5min": $CPU_LOAD_5MIN,
+      "cpu_load_15min": $CPU_LOAD_15MIN
+    },
   "carbon_footprint": {
     "energy_consumption_wh": $FINAL_ENERGY_CONSUMPTION,
     "carbon_emissions_gco2e": $FINAL_CARBON_FOOTPRINT,
@@ -436,12 +477,22 @@ while [[ $retry_count -lt $max_retries ]]; do
         -w "\n%{http_code}\n%{time_total}\n%{size_upload}\n%{speed_upload}" \
         --connect-timeout 10 --max-time 30 2>/dev/null || echo -e "\n000\n0\n0\n0")
     
-    # Parse enhanced response
-    body=$(echo "$response" | head -n -4)
-    code=$(echo "$response" | tail -n 4 | head -n 1)
-    time_total=$(echo "$response" | tail -n 3 | head -n 1)
-    size_upload=$(echo "$response" | tail -n 2 | head -n 1)
-    speed_upload=$(echo "$response" | tail -n 1)
+    # Parse enhanced response (portable across different systems)
+    response_lines=$(echo "$response" | wc -l)
+    if [[ $response_lines -ge 4 ]]; then
+        body=$(echo "$response" | head -n $((response_lines - 4)))
+        code=$(echo "$response" | tail -n 4 | head -n 1)
+        time_total=$(echo "$response" | tail -n 3 | head -n 1)
+        size_upload=$(echo "$response" | tail -n 2 | head -n 1)
+        speed_upload=$(echo "$response" | tail -n 1)
+    else
+        # Fallback for short responses
+        body="$response"
+        code="000"
+        time_total="0"
+        size_upload="0"
+        speed_upload="0"
+    fi
     
     if [[ "$code" -ge 200 && "$code" -lt 300 ]]; then
         log "✅ Enhanced metrics sent successfully!" "SUCCESS"

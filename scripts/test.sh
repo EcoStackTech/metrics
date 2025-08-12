@@ -37,8 +37,8 @@ export BASE_REF=""
 export HEAD_REF="main"
 export WORKSPACE="/tmp/test-workspace"
 
-# Simulate GitHub event timestamps for pipeline tracking
-export EVENT_HEAD_COMMIT_TIMESTAMP="$(date -d '5 minutes ago' -Iseconds)"
+# Simulate GitHub event timestamps for pipeline tracking (macOS compatible)
+export EVENT_HEAD_COMMIT_TIMESTAMP="$(date -v-5M -Iseconds 2>/dev/null || date -d '5 minutes ago' -Iseconds 2>/dev/null || date -Iseconds)"
 export EVENT_PULL_REQUEST_CREATED_AT=""
 export EVENT_PULL_REQUEST_UPDATED_AT=""
 export EVENT_PUSH_BEFORE=""
@@ -62,7 +62,6 @@ echo ""
 
 # Create test workspace
 mkdir -p "$WORKSPACE"
-cd "$WORKSPACE"
 echo "📁 Created test workspace: $WORKSPACE"
 
 # Test system capabilities
@@ -97,11 +96,13 @@ echo "⏳ Simulating pipeline execution..."
 sleep 2
 
 # Run the actual script
-if [[ -f "$(dirname "$0")/post.sh" ]]; then
-    bash "$(dirname "$0")/post.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/post.sh" ]]; then
+    bash "$SCRIPT_DIR/post.sh"
 else
-    echo "❌ Error: post.sh script not found!"
-    echo "   Make sure you're running this from the scripts/ directory"
+    echo "❌ Error: post.sh script not found at $SCRIPT_DIR/post.sh"
+    echo "   Current directory: $(pwd)"
+    echo "   Script directory: $SCRIPT_DIR"
     exit 1
 fi
 
