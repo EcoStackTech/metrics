@@ -1,0 +1,40 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## EcoStack Metrics Action ${{ github.ref_name }}
+            
+            ### Features
+            - Zero configuration setup
+            - Automatic runner metrics collection
+            - System statistics gathering
+            - Flexible authentication options
+            
+            ### Usage
+            ```yaml
+            - name: Run EcoStack metrics action
+              uses: EcoStackTech/metrics@${{ github.ref_name }}
+            ```
+          draft: false
+          prerelease: false

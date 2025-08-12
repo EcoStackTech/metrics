@@ -1,0 +1,34 @@
+name: Example Repository Workflow
+description: "Example of how to use EcoStack metrics in a repository workflow"
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  example-job:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Measure Carbon Footprint
+        uses: EcoStackTech/metrics@v1
+        # No configuration needed - uses default EcoStack API automatically
+        # Automatically measures pipeline duration, resource usage, and carbon footprint
+        # Optional: Add include_system_stats: 'false' to skip carbon footprint calculation
+      
+      - name: Your actual job steps
+        run: |
+          echo "Hello from ${{ github.repository }}"
+          echo "Running on ${{ runner.os }}"
+          echo "Workflow: ${{ github.workflow }}"
+      
+      - name: Another example step
+        if: github.event_name == 'pull_request'
+        run: echo "This is a pull request from ${{ github.head_ref }} to ${{ github.base_ref }}"

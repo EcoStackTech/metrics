@@ -1,0 +1,23 @@
+name: EcoStack Metrics Collection
+description: "Template workflow for collecting runner metrics across the organization"
+
+on:
+  workflow_call:
+    inputs:
+      include_system_stats:
+        description: "Collect system statistics and carbon footprint"
+        required: false
+        type: string
+        default: "true"
+
+jobs:
+  collect-metrics:
+    name: "Collect Runner Metrics"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Measure Carbon Footprint
+        uses: EcoStackTech/metrics@v1
+        with:
+          include_system_stats: ${{ inputs.include_system_stats }}

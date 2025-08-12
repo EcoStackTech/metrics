@@ -1,0 +1,59 @@
+name: "EcoStack Runner Metrics"
+description: "Send GitHub Actions runner/job metrics to your EcoStack API for monitoring and analytics"
+author: "EcoStack"
+branding: 
+  icon: "activity" 
+  color: "green"
+inputs:
+  api_url:
+    description: "Metrics API endpoint (defaults to EcoStack's hosted API)"
+    required: false
+    default: "https://api.ecostack.tech/metric"
+  include_system_stats:
+    description: "Collect CPU/RAM/disk metrics (Linux best effort)"
+    required: false
+    default: "true"
+runs:
+  using: "composite"
+  steps:
+    - name: Validate Configuration
+      shell: bash
+      run: |
+        # Use default API URL if none provided
+        if [[ -z "${{ inputs.api_url }}" ]]; then
+          echo "Using default EcoStack API endpoint: https://api.ecostack.tech/metric"
+        elif [[ ! "${{ inputs.api_url }}" =~ ^https:// ]]; then
+          echo "Error: api_url must use HTTPS protocol" >&2
+          exit 1
+        fi
+        
+        if [[ "${{ inputs.include_system_stats }}" != "true" && "${{ inputs.include_system_stats }}" != "false" ]]; then
+          echo "Error: include_system_stats must be 'true' or 'false'" >&2
+          exit 1
+        fi
+        
+        echo "Configuration validation passed"
+    
+    - name: Collect Metrics & Calculate Carbon Footprint
+      shell: bash
+      env:
+        METRICS_API: ${{ inputs.api_url || 'https://api.ecostack.tech/metric' }}
+        INCLUDE_SYSTEM: ${{ inputs.include_system_stats }}
+        REPO: ${{ github.repository }}
+        RUN_ID: ${{ github.run_id }}
+        RUN_ATTEMPT: ${{ github.run_attempt }}
+        WORKFLOW: ${{ github.workflow }}
+        JOB: ${{ github.job }}
+        ACTOR: ${{ github.actor }}
+        REF: ${{ github.ref }}
+        SHA: ${{ github.sha }}
+        RUNNER_NAME: ${{ runner.name }}
+        RUNNER_OS: ${{ runner.os }}
+        RUNNER_ARCH: ${{ runner.arch }}
+        RUNNER_LABELS: ${{ runner.labels }}
+        EVENT_NAME: ${{ github.event_name }}
+        EVENT_ACTION: ${{ github.event.action }}
+        BASE_REF: ${{ github.base_ref }}
+        HEAD_REF: ${{ github.head_ref }}
+        WORKSPACE: ${{ github.workspace }}
+      run: $GITHUB_ACTION_PATH/scripts/post.sh
