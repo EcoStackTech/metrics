@@ -6,12 +6,12 @@ log() {
     local level="${2:-INFO}"
     local timestamp=$(date '+%H:%M:%S')
     case "$level" in
-        "DEBUG") echo "[EcoStack] 🔍  [$timestamp] $1" >&2 ;;
+        "DEBUG") echo "[EcoStack] 🔍   [$timestamp] $1" >&2 ;;
         "INFO")  echo "[EcoStack] ℹ️   [$timestamp] $1" >&2 ;;
         "WARN")  echo "[EcoStack] ⚠️   [$timestamp] $1" >&2 ;;
-        "ERROR") echo "[EcoStack] ❌  [$timestamp] $1" >&2 ;;
-        "SUCCESS") echo "[EcoStack] ✅ [$timestamp] $1" >&2 ;;
-        *)       echo "[EcoStack] ℹ️   [$timestamp] $1" >&2 ;;
+        "ERROR") echo "[EcoStack] ❌   [$timestamp] $1" >&2 ;;
+        "SUCCESS") echo "[EcoStack] ✅   [$timestamp] $1" >&2 ;;
+        *)       echo "[EcoStack] ℹ️    [$timestamp] $1" >&2 ;;
     esac
 }
 
