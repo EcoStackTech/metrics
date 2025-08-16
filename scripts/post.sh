@@ -366,7 +366,7 @@ fi
 # Build enhanced payload with comprehensive data
 payload=$(cat <<JSON
 {
-  "kind": "enhanced_action_probe",
+  "kind": "github_enhanced_action_probe",
   "ts": "$ACTION_END_ISO",
   "repo": "$REPO",
   "workflow": "$WORKFLOW",
