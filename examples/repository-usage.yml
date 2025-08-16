@@ -4,18 +4,6 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      include_system_stats:
-        description: 'Include system statistics and carbon footprint'
-        required: false
-        default: 'true'
-        type: boolean
-      capture_pipeline_metrics:
-        description: 'Capture true pipeline duration and resource usage'
-        required: false
-        default: 'true'
-        type: boolean
 
 jobs:
   build-and-test:
@@ -48,32 +36,11 @@ jobs:
       # 🌱 MEASURE CARBON FOOTPRINT - Place at the end for best results!
       - name: Measure Carbon Footprint
         uses: EcoStackTech/metrics@v2.0.0
-        with:
-          include_system_stats: ${{ inputs.include_system_stats }}
-          capture_pipeline_metrics: ${{ inputs.capture_pipeline_metrics }}
         # This action will:
         # • Measure the entire pipeline duration (from commit to completion)
-        # • Calculate accurate carbon footprint based on real resource usage
+        # • Collect energy consumption data for accurate carbon calculations
         # • Provide detailed insights into pipeline efficiency
-        # • Send metrics to EcoStack API automatically
+        # • Send unified metrics to EcoStack API with common aggregation fields
+        # • Enable dashboard aggregation across multiple sources
 
-  # Example of conditional metrics collection
-  conditional-metrics:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Run deployment checks
-        run: |
-          echo "Running deployment validation..."
-          sleep 30  # Simulate deployment checks
-      
-      - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v2.0.0
-        with:
-          include_system_stats: true
-          capture_pipeline_metrics: true
-        # Only runs on main branch pushes
-        # Captures deployment pipeline metrics
+

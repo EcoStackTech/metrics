@@ -2,32 +2,11 @@ name: EcoStack Metrics Collection Template
 description: "Reusable workflow template for EcoStack metrics collection across the organization"
 on:
   workflow_call:
-    inputs:
-      include_system_stats:
-        description: 'Include system statistics and carbon footprint calculation'
-        required: false
-        type: boolean
-        default: true
-      capture_pipeline_metrics:
-        description: 'Capture true pipeline duration and resource usage (recommended)'
-        required: false
-        type: boolean
-        default: true
-      runner_type:
-        description: 'Type of runner to use for metrics collection'
-        required: false
-        type: string
-        default: 'ubuntu-latest'
-      timeout_minutes:
-        description: 'Maximum time for metrics collection job'
-        required: false
-        type: number
-        default: 10
 
 jobs:
   collect-metrics:
-    runs-on: ${{ inputs.runner_type }}
-    timeout-minutes: ${{ inputs.timeout_minutes }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     # Ensure this job has the necessary permissions
     permissions:
@@ -41,32 +20,16 @@ jobs:
           # Shallow clone for faster checkout
           fetch-depth: 1
       
-      # Optional: Add any pre-metrics collection steps
-      - name: Pre-metrics setup
-        run: |
-          echo "🔧 Setting up metrics collection environment..."
-          echo "Repository: ${{ github.repository }}"
-          echo "Workflow: ${{ github.workflow }}"
-          echo "Runner: ${{ runner.name }} (${{ runner.os }}/${{ runner.arch }})"
-          echo "Event: ${{ github.event_name }}"
-          echo ""
-          echo "📊 Metrics configuration:"
-          echo "   • System stats: ${{ inputs.include_system_stats }}"
-          echo "   • Pipeline tracking: ${{ inputs.capture_pipeline_metrics }}"
-          echo "   • Runner type: ${{ inputs.runner_type }}"
-          echo "   • Timeout: ${{ inputs.timeout_minutes }} minutes"
-      
       # 🌱 MEASURE CARBON FOOTPRINT - Core metrics collection
       - name: Measure Carbon Footprint
         uses: EcoStackTech/metrics@v2.0.0
-        with:
-          include_system_stats: ${{ inputs.include_system_stats }}
-          capture_pipeline_metrics: ${{ inputs.capture_pipeline_metrics }}
         # This action provides:
         # • True pipeline duration measurement (from commit/PR creation)
         # • Enhanced resource monitoring (CPU, memory, disk, network)
-        # • Accurate carbon footprint calculation
+        # • Energy consumption data for API-side carbon calculations
         # • Pipeline efficiency insights
+        # • Unified metrics structure for dashboard aggregation
+        # • Common metrics (entity ID, location, category, department)
         # • Automatic API transmission to EcoStack
       
       # Optional: Post-metrics collection steps
@@ -99,11 +62,6 @@ jobs:
 # jobs:
 #   metrics:
 #     uses: ./.github/workflows/ecostack-metrics.yml
-#     with:
-#       include_system_stats: true
-#       capture_pipeline_metrics: true
-#       runner_type: ubuntu-latest
-#       timeout_minutes: 15
 #
 #   # Your other jobs...
 #   build:

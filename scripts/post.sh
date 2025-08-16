@@ -368,56 +368,75 @@ payload=$(cat <<JSON
 {
   "type": "github_action",
   "ts": "$ACTION_END_ISO",
-  "repo": "$REPO",
-  "workflow": "$WORKFLOW",
-  "job": "$JOB",
-  "actor": "$ACTOR",
-  "ref": "$REF",
-  "sha": "$SHA",
-  "run_id": "$RUN_ID",
-  "run_attempt": $RUN_ATTEMPT,
-  "event": {
-    "name": "$EVENT_NAME",
-    "action": "$EVENT_ACTION",
-    "base_ref": "$BASE_REF",
-    "head_ref": "$HEAD_REF",
-    "head_commit_timestamp": "$EVENT_HEAD_COMMIT_TIMESTAMP",
-    "pull_request_created_at": "$EVENT_PULL_REQUEST_CREATED_AT",
-    "pull_request_updated_at": "$EVENT_PULL_REQUEST_UPDATED_AT",
-    "push_before": "$EVENT_PUSH_BEFORE",
-    "push_after": "$EVENT_PUSH_AFTER",
-    "issue_created_at": "$EVENT_ISSUE_CREATED_AT",
-    "issue_updated_at": "$EVENT_ISSUE_UPDATED_AT",
-    "release_created_at": "$EVENT_RELEASE_CREATED_AT",
-    "release_published_at": "$EVENT_RELEASE_PUBLISHED_AT",
-    "schedule": "$EVENT_SCHEDULE",
-    "workflow_dispatch_inputs": "$EVENT_WORKFLOW_DISPATCH_INPUTS"
+  "source": "github_actions",
+  "version": "2.0.0",
+  "metadata": {
+    "source_version": "v4.0.0",
+    "collection_method": "action"
   },
-  "runner": {
-    "name": "$RUNNER_NAME",
-    "os": "$RUNNER_OS",
-    "arch": "$RUNNER_ARCH",
-    "labels": "$RUNNER_LABELS",
-    "type": "$RUNNER_TYPE"
+  "common_metrics": {
+    "entity_id": "$REPO-$WORKFLOW-$JOB-$RUN_ID",
+    "entity_name": "$WORKFLOW - $JOB",
+    "location": {
+      "country": "USA",
+      "region": "East US",
+      "city": "Ashburn"
+    },
+    "energy_kwh": $FINAL_ENERGY_CONSUMPTION,
+    "category": "ci_cd",
+    "department": "engineering"
   },
-  "system": {
-    "cores": $CORES,
-    "mem_total_mb": $MEM_TOTAL_MB,
-    "mem_available_mb": $MEM_AVAILABLE_MB,
-    "mem_usage_percent": $MEM_USAGE,
-    "mem_peak_mb": $MEM_PEAK,
-    "mem_buffered_mb": $MEM_BUFFERED_MB,
-    "mem_cached_mb": $MEM_CACHED_MB,
-    "disk_total_mb": $DISK_TOTAL_MB,
-    "disk_used_mb": $DISK_USED_MB,
-    "disk_avail_mb": $DISK_AVAIL_MB,
-    "disk_io_bytes": $DISK_IO,
-    "disk_io_read_bytes": $DISK_IO_READ,
-    "disk_io_write_bytes": $DISK_IO_WRITE,
-    "net_io_rx_bytes": $NET_IO_RX,
-    "net_io_tx_bytes": $NET_IO_TX
-  },
-      "performance": {
+  "payload": {
+    "repo": "$REPO",
+    "workflow": "$WORKFLOW",
+    "job": "$JOB",
+    "actor": "$ACTOR",
+    "ref": "$REF",
+    "sha": "$SHA",
+    "run_id": "$RUN_ID",
+    "run_attempt": $RUN_ATTEMPT,
+    "event": {
+      "name": "$EVENT_NAME",
+      "action": "$EVENT_ACTION",
+      "base_ref": "$BASE_REF",
+      "head_ref": "$HEAD_REF",
+      "head_commit_timestamp": "$EVENT_HEAD_COMMIT_TIMESTAMP",
+      "pull_request_created_at": "$EVENT_PULL_REQUEST_CREATED_AT",
+      "pull_request_updated_at": "$EVENT_PULL_REQUEST_UPDATED_AT",
+      "push_before": "$EVENT_PUSH_BEFORE",
+      "push_after": "$EVENT_PUSH_AFTER",
+      "issue_created_at": "$EVENT_ISSUE_CREATED_AT",
+      "issue_updated_at": "$EVENT_ISSUE_UPDATED_AT",
+      "release_created_at": "$EVENT_RELEASE_CREATED_AT",
+      "release_published_at": "$EVENT_RELEASE_PUBLISHED_AT",
+      "schedule": "$EVENT_SCHEDULE",
+      "workflow_dispatch_inputs": "$EVENT_WORKFLOW_DISPATCH_INPUTS"
+    },
+    "runner": {
+      "name": "$RUNNER_NAME",
+      "os": "$RUNNER_OS",
+      "arch": "$RUNNER_ARCH",
+      "labels": "$RUNNER_LABELS",
+      "type": "$RUNNER_TYPE"
+    },
+    "system": {
+      "cores": $CORES,
+      "mem_total_mb": $MEM_TOTAL_MB,
+      "mem_available_mb": $MEM_AVAILABLE_MB,
+      "mem_usage_percent": $MEM_USAGE,
+      "mem_peak_mb": $MEM_PEAK,
+      "mem_buffered_mb": $MEM_BUFFERED_MB,
+      "mem_cached_mb": $MEM_CACHED_MB,
+      "disk_total_mb": $DISK_TOTAL_MB,
+      "disk_used_mb": $DISK_USED_MB,
+      "disk_avail_mb": $DISK_AVAIL_MB,
+      "disk_io_bytes": $DISK_IO,
+      "disk_io_read_bytes": $DISK_IO_READ,
+      "disk_io_write_bytes": $DISK_IO_WRITE,
+      "net_io_rx_bytes": $NET_IO_RX,
+      "net_io_tx_bytes": $NET_IO_TX
+    },
+    "performance": {
       "pipeline_start_time": "$PIPELINE_START_ISO",
       "action_start_time": "$ACTION_START_ISO",
       "action_end_time": "$ACTION_END_ISO",
@@ -431,26 +450,27 @@ payload=$(cat <<JSON
       "cpu_load_5min": $CPU_LOAD_5MIN,
       "cpu_load_15min": $CPU_LOAD_15MIN
     },
-  "carbon_footprint": {
-    "energy_consumption_wh": $FINAL_ENERGY_CONSUMPTION,
-    "carbon_emissions_gco2e": $FINAL_CARBON_FOOTPRINT,
-    "energy_mix": "$ENERGY_MIX",
-    "energy_mix_factor": $ENERGY_MIX_FACTOR,
-    "renewable_percentage": $RENEWABLE_PERCENTAGE,
-    "total_power_watts": $TOTAL_POWER_W,
-    "utilized_power_watts": $UTILIZED_POWER_W,
-    "cpu_power_watts": $CPU_POWER_W,
-    "memory_power_watts": $MEM_POWER_W,
-    "base_power_watts": $BASE_POWER_W,
-    "runner_efficiency": "$RUNNER_TYPE",
-    "carbon_intensity_gco2e_per_kwh": $CARBON_INTENSITY
-  },
-  "workspace": "$WORKSPACE",
-  "metadata": {
-    "version": "2.0.0",
-    "enhanced_metrics": true,
-    "pipeline_tracking": ${CAPTURE_PIPELINE:-true},
-    "system_monitoring": ${INCLUDE_SYSTEM:-true}
+    "carbon_footprint": {
+      "energy_consumption_wh": $FINAL_ENERGY_CONSUMPTION,
+      "carbon_emissions_gco2e": $FINAL_CARBON_FOOTPRINT,
+      "energy_mix": "$ENERGY_MIX",
+      "energy_mix_factor": $ENERGY_MIX_FACTOR,
+      "renewable_percentage": $RENEWABLE_PERCENTAGE,
+      "total_power_watts": $TOTAL_POWER_W,
+      "utilized_power_watts": $UTILIZED_POWER_W,
+      "cpu_power_watts": $CPU_POWER_W,
+      "memory_power_watts": $MEM_POWER_W,
+      "base_power_watts": $BASE_POWER_W,
+      "runner_efficiency": "$RUNNER_TYPE",
+      "carbon_intensity_gco2e_per_kwh": $CARBON_INTENSITY
+    },
+    "workspace": "$WORKSPACE",
+    "metadata": {
+      "version": "2.0.0",
+      "enhanced_metrics": true,
+      "pipeline_tracking": ${CAPTURE_PIPELINE:-true},
+      "system_monitoring": ${INCLUDE_SYSTEM:-true}
+    }
   }
 }
 JSON

@@ -16,6 +16,8 @@
 - **🌱 Improved Carbon Footprint**: More accurate calculations with real pipeline duration
 - **📊 Better Insights**: Pipeline efficiency metrics and environmental impact context
 - **🔄 Enhanced Reliability**: Better error handling and retry logic
+- **🔄 Unified Structure**: Common metrics for dashboard aggregation across multiple sources
+- **🌍 API-Side Carbon**: Real-time carbon calculations using current carbon intensity data
 
 ## 📖 Overview
 
@@ -51,6 +53,8 @@ jobs:
       - name: Measure Carbon Footprint
         uses: EcoStackTech/metrics@v2.0.0
 ```
+
+> **💡 Simple & Smart**: The action works out of the box with sensible defaults. For advanced configuration options, see the [Organization Setup Guide](docs/organization-setup.md).
 
 ### Advanced Usage
 
@@ -127,57 +131,84 @@ jobs:
 
 ## 📈 API Response Format
 
-The action sends a comprehensive JSON payload to your API:
+The action sends a unified JSON payload to your API with consistent structure for dashboard aggregation:
 
 ```json
 {
-  "kind": "enhanced_action_probe",
+  "type": "github_action",
   "ts": "2024-01-15T10:30:00Z",
-  "repo": "owner/repo",
-  "workflow": "CI",
-  "job": "build",
-  "runner": {
-    "name": "ubuntu-latest",
-    "type": "github-hosted",
-    "os": "Linux",
-    "arch": "X64"
+  "source": "github_actions",
+  "version": "2.0.0",
+  "metadata": {
+    "source_version": "v4.0.0",
+    "collection_method": "action"
   },
-  "performance": {
-    "pipeline_duration_seconds": 1800,
-    "pipeline_duration_minutes": 30,
-    "action_duration_seconds": 5,
-    "action_duration_minutes": 0
+  "common_metrics": {
+    "entity_id": "owner/repo-workflow-job-run_id",
+    "entity_name": "Workflow - Job",
+    "location": {
+      "country": "USA",
+      "region": "East US",
+      "city": "Ashburn"
+    },
+    "energy_kwh": 0.025,
+    "category": "ci_cd",
+    "department": "engineering"
   },
-  "carbon_footprint": {
-    "energy_consumption_wh": 25,
-    "carbon_emissions_gco2e": 125,
-    "energy_mix": "renewable",
-    "renewable_percentage": 100
-  },
-  "system": {
-    "cores": 2,
-    "mem_total_mb": 7168,
-    "cpu_usage_percent": 45
+  "payload": {
+    "repo": "owner/repo",
+    "workflow": "CI",
+    "job": "build",
+    "runner": {
+      "name": "ubuntu-latest",
+      "type": "github-hosted",
+      "os": "Linux",
+      "arch": "X64"
+    },
+    "performance": {
+      "pipeline_duration_seconds": 1800,
+      "pipeline_duration_minutes": 30,
+      "action_duration_seconds": 5,
+      "action_duration_minutes": 0
+    },
+    "system": {
+      "cores": 2,
+      "mem_total_mb": 7168,
+      "cpu_usage_percent": 45
+    }
   }
 }
 ```
 
+### 🔄 **Unified Structure Benefits**
+- **Consistent Aggregation**: Common metrics enable dashboard aggregation across all sources
+- **Geographic Analysis**: Location data for regional breakdowns
+- **Category Filtering**: Business and technical classification
+- **Entity Tracking**: Unique identification for specific pipelines
+- **Energy Data**: Raw energy consumption for accurate carbon calculations
+
 ## 🌍 Carbon Footprint Calculation
 
-### Formula
-```
-Carbon Footprint = Energy × Energy Mix Factor × Carbon Intensity
-```
+### Energy Data Collection
+The action collects raw energy consumption data (`energy_kwh`) and sends it to the EcoStack API, where accurate carbon footprint calculations are performed using real-time carbon intensity data.
 
-### Energy Mix Factors
-- **GitHub-hosted runners**: 0.1 (100% renewable energy)
-- **Self-hosted runners**: 0.5 (grid energy mix)
-- **Unknown runners**: 0.3 (conservative estimate)
+### What the Action Provides
+- **Energy Consumption**: Watt-hours based on actual resource usage and duration
+- **Resource Utilization**: CPU, memory, and disk usage metrics
+- **Pipeline Duration**: Accurate timing for energy calculations
+- **Runner Information**: Energy efficiency classification
 
-### Carbon Intensity
-- **Renewable**: 50 gCO2e/kWh
-- **Grid**: 400 gCO2e/kWh
-- **Mixed**: 200 gCO2e/kWh
+### What the API Calculates
+- **Carbon Emissions**: Based on real-time carbon intensity data
+- **Energy Mix Factors**: Dynamic calculations for different regions
+- **Carbon Intensity**: Up-to-date values for renewable vs. grid energy
+- **Environmental Impact**: Contextual comparisons and insights
+
+### Benefits of API-Side Calculation
+- **Real-Time Accuracy**: Uses current carbon intensity data
+- **Regional Precision**: Location-specific calculations
+- **Dynamic Updates**: Reflects changing energy mix
+- **Consistent Methodology**: Standardized across all sources
 
 ## 🎯 Best Practices
 

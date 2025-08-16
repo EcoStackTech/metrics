@@ -119,26 +119,30 @@ jobs:
 
 ## 🔧 Configuration Options
 
-### Template Inputs
+### Advanced Configuration
+
+For users who need fine-grained control, the action supports these input parameters:
 
 | Input | Description | Default | Required |
 |-------|-------------|---------|----------|
 | `include_system_stats` | Collect CPU/memory/disk metrics | `true` | No |
 | `capture_pipeline_metrics` | Track true pipeline duration | `true` | No |
-| `runner_type` | Runner type for metrics collection | `ubuntu-latest` | No |
 
-### Repository-Level Overrides
-
-Repositories can override template defaults:
+### Example with Custom Configuration
 
 ```yaml
-- name: Use EcoStack Metrics
-  uses: ./.github/workflows/ecostack-metrics.yml
+- name: Measure Carbon Footprint
+  uses: EcoStackTech/metrics@v2.0.0
   with:
-    include_system_stats: false  # Override template default
-    capture_pipeline_metrics: true
-    runner_type: windows-latest  # Use different runner
+    include_system_stats: false      # Skip detailed system monitoring
+    capture_pipeline_metrics: true   # Keep pipeline duration tracking
 ```
+
+### When to Use Advanced Configuration
+
+- **`include_system_stats: false`**: When you want faster execution and only need basic metrics
+- **`capture_pipeline_metrics: false`**: When you only want to measure the action execution time
+- **Both `true` (default)**: Recommended for comprehensive monitoring and accurate carbon calculations
 
 ## 📊 Organization Dashboard
 
@@ -152,11 +156,14 @@ Repositories can override template defaults:
 
 ### Key Metrics
 
-- **Total CO2 Emissions**: Combined impact of all pipelines
-- **Energy Consumption**: Total watt-hours used
+- **Total CO2 Emissions**: Combined impact of all pipelines (calculated by API)
+- **Energy Consumption**: Total watt-hours used across all sources
 - **Runner Efficiency**: GitHub-hosted vs self-hosted usage
 - **Pipeline Duration**: Average execution times
 - **Resource Utilization**: CPU and memory efficiency
+- **Geographic Distribution**: Regional breakdown of emissions
+- **Department Analysis**: Business unit impact assessment
+- **Category Insights**: CI/CD vs IoT vs Cloud service comparisons
 
 ## 🎯 Best Practices
 
@@ -252,6 +259,24 @@ See [`examples/organization-template.yml`](../examples/organization-template.yml
 
 See [`examples/repository-usage.yml`](../examples/repository-usage.yml) for repository-level usage examples.
 
+## 🔄 Unified Metrics Structure
+
+EcoStack Metrics v2.0.0 uses a unified payload structure that enables:
+
+### **Common Metrics for Aggregation**
+- **Entity Identification**: Unique IDs for pipelines, devices, and services
+- **Geographic Location**: Regional breakdown and analysis
+- **Energy Consumption**: Raw energy data for accurate carbon calculations
+- **Business Classification**: Department and category organization
+- **Consistent Timestamps**: Universal time tracking across all sources
+
+### **Dashboard Benefits**
+- **Cross-Source Aggregation**: Combine metrics from GitHub Actions, GitLab, CloudWatch, IoT
+- **Regional Analysis**: Geographic breakdown of environmental impact
+- **Department Insights**: Business unit sustainability tracking
+- **Category Comparison**: CI/CD vs infrastructure vs manufacturing metrics
+- **Real-Time Carbon**: API-side calculations using current carbon intensity data
+
 ## 🚀 Next Steps
 
 1. **Install the EcoStack app** in your organization
@@ -259,6 +284,7 @@ See [`examples/repository-usage.yml`](../examples/repository-usage.yml) for repo
 3. **Add to key repositories** to start collecting data
 4. **Monitor your dashboard** for insights
 5. **Set sustainability goals** and track progress
+6. **Prepare for multi-source expansion** (GitLab, CloudWatch, IoT devices)
 
 ## 🌟 Benefits
 
