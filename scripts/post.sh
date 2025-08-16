@@ -6,13 +6,19 @@ log() {
     local level="${2:-INFO}"
     local timestamp=$(date '+%H:%M:%S')
     case "$level" in
-        "DEBUG") echo "[EcoStack] 🔍 [$timestamp] $1" >&2 ;;
-        "INFO")  echo "[EcoStack] ℹ️  [$timestamp] $1" >&2 ;;
-        "WARN")  echo "[EcoStack] ⚠️  [$timestamp] $1" >&2 ;;
-        "ERROR") echo "[EcoStack] ❌ [$timestamp] $1" >&2 ;;
-        "SUCCESS") echo "[EcoStack] ✅ [$timestamp] $1" >&2 ;;
-        *)       echo "[EcoStack] ℹ️  [$timestamp] $1" >&2 ;;
+        "DEBUG") echo "[EcoStack] 🔍  [$timestamp] $1" >&2 ;;
+        "INFO")  echo "[EcoStack] ℹ️   [$timestamp] $1" >&2 ;;
+        "WARN")  echo "[EcoStack] ⚠️   [$timestamp] $1" >&2 ;;
+        "ERROR") echo "[EcoStack] ❌  [$timestamp] $1" >&2 ;;
+        "SUCCESS") echo "[EcoStack] ✅  [$timestamp] $1" >&2 ;;
+        *)       echo "[EcoStack] ℹ️   [$timestamp] $1" >&2 ;;
     esac
+}
+
+# Helper function for aligned bullet points
+log_bullet() {
+    local timestamp=$(date '+%H:%M:%S')
+    echo "[EcoStack] ℹ️   [$timestamp]   • $1" >&2
 }
 
 log "🚀 Starting EcoStack enhanced metrics collection..." "INFO"
@@ -192,14 +198,14 @@ if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
     fi
     
     log "✅ Enhanced system stats collected:" "SUCCESS"
-    log "   • CPU: $CORES cores (${CPU_USAGE}% load)" "INFO"
-    log "   • Load averages: ${CPU_LOAD_1MIN}, ${CPU_LOAD_5MIN}, ${CPU_LOAD_15MIN}" "INFO"
-    log "   • Memory: ${MEM_TOTAL_MB}MB total (${MEM_USAGE}% used)" "INFO"
-    log "   • Memory breakdown: ${MEM_BUFFERED_MB}MB buffered, ${MEM_CACHED_MB}MB cached" "INFO"
-    log "   • Disk: ${DISK_USED_MB}MB used, ${DISK_AVAIL_MB}MB available (${DISK_TOTAL_MB}MB total)" "INFO"
-    log "   • Peak Memory: ${MEM_PEAK}MB" "INFO"
-    log "   • Disk I/O: ${DISK_IO} bytes (${DISK_IO_READ} read, ${DISK_IO_WRITE} write)" "INFO"
-    log "   • Network I/O: ${NET_IO_RX} bytes received, ${NET_IO_TX} bytes sent" "INFO"
+    log_bullet "CPU: $CORES cores (${CPU_USAGE}% load)"
+    log_bullet "Load averages: ${CPU_LOAD_1MIN}, ${CPU_LOAD_5MIN}, ${CPU_LOAD_15MIN}"
+    log_bullet "Memory: ${MEM_TOTAL_MB}MB total (${MEM_USAGE}% used)"
+    log_bullet "Memory breakdown: ${MEM_BUFFERED_MB}MB buffered, ${MEM_CACHED_MB}MB cached"
+    log_bullet "Disk: ${DISK_USED_MB}MB used, ${DISK_AVAIL_MB}MB available (${DISK_TOTAL_MB}MB total)"
+    log_bullet "Peak Memory: ${MEM_PEAK}MB"
+    log_bullet "Disk I/O: ${DISK_IO} bytes (${DISK_IO_READ} read, ${DISK_IO_WRITE} write)"
+    log_bullet "Network I/O: ${NET_IO_RX} bytes received, ${NET_IO_TX} bytes sent"
 else
     log "⏭️  Skipping system statistics collection" "INFO"
 fi
@@ -282,13 +288,13 @@ if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
     CARBON_FOOTPRINT=$((ENERGY_CONSUMPTION * ENERGY_MIX_FACTOR * CARBON_INTENSITY / 1000))  # gCO2e
     
     log "⚡ Enhanced power analysis:" "INFO"
-    log "   • Total power: ${TOTAL_POWER_W}W" "INFO"
-    log "   • Utilized power: ${UTILIZED_POWER_W}W (${CPU_USAGE}% CPU, ${MEM_USAGE}% MEM)" "INFO"
-    log "   • CPU power: ${CPU_POWER_W}W" "INFO"
-    log "   • Memory power: ${MEM_POWER_W}W" "INFO"
-    log "   • Base power: ${BASE_POWER_W}W" "INFO"
-    log "   • Energy mix: $ENERGY_MIX (${RENEWABLE_PERCENTAGE}% renewable)" "INFO"
-    log "   • Carbon intensity: ${CARBON_INTENSITY}g CO2e/kWh" "INFO"
+    log_bullet "Total power: ${TOTAL_POWER_W}W"
+    log_bullet "Utilized power: ${UTILIZED_POWER_W}W (${CPU_USAGE}% CPU, ${MEM_USAGE}% MEM)"
+    log_bullet "CPU power: ${CPU_POWER_W}W"
+    log_bullet "Memory power: ${MEM_POWER_W}W"
+    log_bullet "Base power: ${BASE_POWER_W}W"
+    log_bullet "Energy mix: $ENERGY_MIX (${RENEWABLE_PERCENTAGE}% renewable)"
+    log_bullet "Carbon intensity: ${CARBON_INTENSITY}g CO2e/kWh"
 fi
 
 # =============================================================================
@@ -311,12 +317,12 @@ TOTAL_PIPELINE_DURATION=$((ACTION_END_TIME - PIPELINE_START_TIME))
 TOTAL_PIPELINE_MINUTES=$((TOTAL_PIPELINE_DURATION / 60))
 
 log "⏱️  Timing summary:" "INFO"
-log "   • Action execution: ${ACTION_DURATION_SECONDS}s (${ACTION_DURATION_MINUTES}m)" "INFO"
+log_bullet "Action execution: ${ACTION_DURATION_SECONDS}s (${ACTION_DURATION_MINUTES}m)"
 if [[ $ACTUAL_PIPELINE_DURATION -gt 0 ]]; then
-    log "   • Total pipeline: ${TOTAL_PIPELINE_DURATION}s (${TOTAL_PIPELINE_MINUTES}m)" "INFO"
-    log "   • Pipeline efficiency: ${ACTION_DURATION_SECONDS}s action time for ${TOTAL_PIPELINE_DURATION}s total" "INFO"
+    log_bullet "Total pipeline: ${TOTAL_PIPELINE_DURATION}s (${TOTAL_PIPELINE_MINUTES}m)"
+    log_bullet "Pipeline efficiency: ${ACTION_DURATION_SECONDS}s action time for ${TOTAL_PIPELINE_DURATION}s total"
 else
-    log "   • Total pipeline: Could not determine (using action duration)" "WARN"
+    log_bullet "Total pipeline: Could not determine (using action duration)"
 fi
 
 # =============================================================================
@@ -335,21 +341,21 @@ if [[ "${INCLUDE_SYSTEM:-true}" == "true" ]]; then
     FINAL_CARBON_FOOTPRINT=$((FINAL_ENERGY_CONSUMPTION * ENERGY_MIX_FACTOR * CARBON_INTENSITY / 1000))
     
     log "🌍 Final carbon footprint calculation:" "SUCCESS"
-    log "   • Energy consumed: ${FINAL_ENERGY_CONSUMPTION}Wh" "INFO"
-    log "   • Carbon emissions: ${FINAL_CARBON_FOOTPRINT}g CO2e" "INFO"
-    log "   • Runner type: $RUNNER_TYPE" "INFO"
-    log "   • Energy mix: $ENERGY_MIX (${RENEWABLE_PERCENTAGE}% renewable)" "INFO"
-    log "   • Duration used: ${BEST_DURATION}s" "INFO"
+    log_bullet "Energy consumed: ${FINAL_ENERGY_CONSUMPTION}Wh"
+    log_bullet "Carbon emissions: ${FINAL_CARBON_FOOTPRINT}g CO2e"
+    log_bullet "Runner type: $RUNNER_TYPE"
+    log_bullet "Energy mix: $ENERGY_MIX (${RENEWABLE_PERCENTAGE}% renewable)"
+    log_bullet "Duration used: ${BEST_DURATION}s"
     
     # Environmental impact context
     if [[ $FINAL_CARBON_FOOTPRINT -lt 100 ]]; then
-        log "   🌱 Impact: Very low - equivalent to charging a phone for ~${FINAL_ENERGY_CONSUMPTION} minutes" "SUCCESS"
+        log "🌱 Impact: Very low - equivalent to charging a phone for ~${FINAL_ENERGY_CONSUMPTION} minutes" "SUCCESS"
     elif [[ $FINAL_CARBON_FOOTPRINT -lt 500 ]]; then
-        log "   🌱 Impact: Low - equivalent to using a laptop for ~${FINAL_ENERGY_CONSUMPTION} minutes" "SUCCESS"
+        log "🌱 Impact: Low - equivalent to using a laptop for ~${FINAL_ENERGY_CONSUMPTION} minutes" "SUCCESS"
     elif [[ $FINAL_CARBON_FOOTPRINT -lt 1000 ]]; then
-        log "   🌱 Impact: Moderate - equivalent to running a desktop for ~${FINAL_ENERGY_CONSUMPTION} minutes" "INFO"
+        log "🌱 Impact: Moderate - equivalent to running a desktop for ~${FINAL_ENERGY_CONSUMPTION} minutes" "INFO"
     else
-        log "   🌱 Impact: High - consider optimizing your pipeline for efficiency" "WARN"
+        log "🌱 Impact: High - consider optimizing your pipeline for efficiency" "WARN"
     fi
 fi
 
@@ -496,12 +502,12 @@ while [[ $retry_count -lt $max_retries ]]; do
     
     if [[ "$code" -ge 200 && "$code" -lt 300 ]]; then
         log "✅ Enhanced metrics sent successfully!" "SUCCESS"
-        log "   • HTTP Status: $code" "INFO"
-        log "   • Response Time: ${time_total}s" "INFO"
-        log "   • Payload Size: ${size_upload} bytes" "INFO"
-        log "   • Upload Speed: ${speed_upload} bytes/s" "INFO"
-        log "   • Carbon Footprint: ${FINAL_CARBON_FOOTPRINT}g CO2e" "INFO"
-        log "   • Pipeline Duration: ${TOTAL_PIPELINE_MINUTES}m" "INFO"
+        log_bullet "HTTP Status: $code"
+        log_bullet "Response Time: ${time_total}s"
+        log_bullet "Payload Size: ${size_upload} bytes"
+        log_bullet "Upload Speed: ${speed_upload} bytes/s"
+        log_bullet "Carbon Footprint: ${FINAL_CARBON_FOOTPRINT}g CO2e"
+        log_bullet "Pipeline Duration: ${TOTAL_PIPELINE_MINUTES}m"
         break
     else
         retry_count=$((retry_count + 1))
@@ -509,9 +515,9 @@ while [[ $retry_count -lt $max_retries ]]; do
         
         if [[ $retry_count -eq $max_retries ]]; then
             log "💥 Failed to send metrics after $max_retries attempts" "ERROR"
-            log "   • Last error: HTTP $code" "ERROR"
-            log "   • Check your API endpoint and network connectivity" "ERROR"
-            log "   • Metrics payload size: ${#payload} characters" "DEBUG"
+            log_bullet "Last error: HTTP $code"
+            log_bullet "Check your API endpoint and network connectivity"
+            log_bullet "Metrics payload size: ${#payload} characters"
             # Don't fail the build by default - change to 'exit 1' if you want hard-fail
             exit 0
         fi
@@ -524,12 +530,12 @@ done
 
 log "🎉 EcoStack enhanced metrics collection completed successfully!" "SUCCESS"
 log "📊 Summary:" "INFO"
-log "   • Pipeline duration: ${TOTAL_PIPELINE_MINUTES}m" "INFO"
-log "   • Action duration: ${ACTION_DURATION_MINUTES}m" "INFO"
-log "   • Carbon footprint: ${FINAL_CARBON_FOOTPRINT}g CO2e" "INFO"
-log "   • Energy consumed: ${FINAL_ENERGY_CONSUMPTION}Wh" "INFO"
-log "   • Runner efficiency: $RUNNER_TYPE" "INFO"
-log "   • Enhanced metrics: Enabled" "INFO"
-log "   • Pipeline tracking: ${CAPTURE_PIPELINE:-true}" "INFO"
+log_bullet "Pipeline duration: ${TOTAL_PIPELINE_MINUTES}m"
+log_bullet "Action duration: ${ACTION_DURATION_MINUTES}m"
+log_bullet "Carbon footprint: ${FINAL_CARBON_FOOTPRINT}g CO2e"
+log_bullet "Energy consumed: ${FINAL_ENERGY_CONSUMPTION}Wh"
+log_bullet "Runner efficiency: $RUNNER_TYPE"
+log_bullet "Enhanced metrics: Enabled"
+log_bullet "Pipeline tracking: ${CAPTURE_PIPELINE:-true}"
 
 log "🌱 Thank you for using EcoStack to measure your environmental impact!" "SUCCESS"
