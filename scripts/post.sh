@@ -10,7 +10,7 @@ log() {
         "INFO")  echo "[EcoStack] ℹ️   [$timestamp] $1" >&2 ;;
         "WARN")  echo "[EcoStack] ⚠️   [$timestamp] $1" >&2 ;;
         "ERROR") echo "[EcoStack] ❌  [$timestamp] $1" >&2 ;;
-        "SUCCESS") echo "[EcoStack] ✅  [$timestamp] $1" >&2 ;;
+        "SUCCESS") echo "[EcoStack] ✅ [$timestamp] $1" >&2 ;;
         *)       echo "[EcoStack] ℹ️   [$timestamp] $1" >&2 ;;
     esac
 }
@@ -486,7 +486,7 @@ JSON
 # =============================================================================
 
 log "📡 Sending enhanced metrics to EcoStack API..." "INFO"
-log "🔐 Authentication: Repository-based ($REPO)" "INFO"
+log "🔐 Authentication: Repository-based authentication" "INFO"
 
 # Build headers
 hdrs=(-H "Content-Type: application/json" -H "User-Agent: EcoStack-Metrics/2.0.0")
