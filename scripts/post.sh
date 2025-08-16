@@ -115,6 +115,11 @@ BASE_REF="${BASE_REF:-}"
 HEAD_REF="${HEAD_REF:-main}"
 WORKSPACE="${WORKSPACE:-/tmp/test-workspace}"
 
+# Initialize location variables (configurable, defaults to null for unknown)
+LOCATION_COUNTRY="${LOCATION_COUNTRY:-}"
+LOCATION_REGION="${LOCATION_REGION:-}"
+LOCATION_CITY="${LOCATION_CITY:-}"
+
 # Initialize event timestamp variables (with defaults for local testing)
 EVENT_HEAD_COMMIT_TIMESTAMP="${EVENT_HEAD_COMMIT_TIMESTAMP:-}"
 EVENT_PULL_REQUEST_CREATED_AT="${EVENT_PULL_REQUEST_CREATED_AT:-}"
@@ -378,9 +383,9 @@ payload=$(cat <<JSON
     "entity_id": "$REPO-$WORKFLOW-$JOB-$RUN_ID",
     "entity_name": "$WORKFLOW - $JOB",
     "location": {
-      "country": "USA",
-      "region": "East US",
-      "city": "Ashburn"
+      "country": ${LOCATION_COUNTRY:+$LOCATION_COUNTRY}${LOCATION_COUNTRY:-null},
+      "region": ${LOCATION_REGION:+$LOCATION_REGION}${LOCATION_REGION:-null},
+      "city": ${LOCATION_CITY:+$LOCATION_CITY}${LOCATION_CITY:-null}
     },
     "energy_kwh": $FINAL_ENERGY_CONSUMPTION,
     "category": "ci_cd",

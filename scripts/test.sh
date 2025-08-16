@@ -37,6 +37,11 @@ export BASE_REF=""
 export HEAD_REF="main"
 export WORKSPACE="/tmp/test-workspace"
 
+# Location configuration (set to empty for null values, or override for specific testing)
+export LOCATION_COUNTRY=""
+export LOCATION_REGION=""
+export LOCATION_CITY=""
+
 # Simulate GitHub event timestamps for pipeline tracking (macOS compatible)
 export EVENT_HEAD_COMMIT_TIMESTAMP="$(date -v-5M -Iseconds 2>/dev/null || date -d '5 minutes ago' -Iseconds 2>/dev/null || date -Iseconds)"
 export EVENT_PULL_REQUEST_CREATED_AT=""
@@ -61,6 +66,7 @@ echo "   • Simulated Pipeline Start: $EVENT_HEAD_COMMIT_TIMESTAMP"
 echo "   • Entity ID: $REPO-$WORKFLOW-$JOB-$RUN_ID"
 echo "   • Category: ci_cd"
 echo "   • Department: engineering"
+echo "   • Location: ${LOCATION_COUNTRY:-null}/${LOCATION_REGION:-null}/${LOCATION_CITY:-null}"
 echo ""
 
 # Create test workspace
