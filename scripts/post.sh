@@ -371,7 +371,7 @@ fi
 # Build enhanced payload with comprehensive data
 payload=$(cat <<JSON
 {
-  "type": "github_action",
+  "type": "metric",
   "ts": "$ACTION_END_ISO",
   "source": "github_actions",
   "version": "2.0.0",
