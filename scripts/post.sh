@@ -428,9 +428,9 @@ payload=$(cat <<JSON
     "entity_id": "$REPO-$(echo "$WORKFLOW" | sed 's/[^a-zA-Z0-9-]/_/g')-$(echo "$JOB" | sed 's/[^a-zA-Z0-9-]/_/g')-$RUN_ID",
     "entity_name": "$WORKFLOW - $JOB",
     "location": {
-      "country": ${LOCATION_COUNTRY:+"\"$LOCATION_COUNTRY\""}${LOCATION_COUNTRY:-null},
-      "region": ${LOCATION_REGION:+"\"$LOCATION_REGION\""}${LOCATION_REGION:-null},
-      "city": ${LOCATION_CITY:+"\"$LOCATION_CITY\""}${LOCATION_CITY:-null}
+      "country": $(if [[ -n "$LOCATION_COUNTRY" ]]; then echo "\"$LOCATION_COUNTRY\""; else echo "null"; fi),
+      "region": $(if [[ -n "$LOCATION_REGION" ]]; then echo "\"$LOCATION_REGION\""; else echo "null"; fi),
+      "city": $(if [[ -n "$LOCATION_CITY" ]]; then echo "\"$LOCATION_CITY\""; else echo "null"; fi)
     },
     "energy_kwh": $(echo "scale=3; $FINAL_ENERGY_CONSUMPTION / 1000" | bc 2>/dev/null || echo "0"),
     "category": "ci_cd",
