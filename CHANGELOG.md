@@ -5,6 +5,28 @@ All notable changes to the EcoStack Metrics GitHub Action will be documented in 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [8.1.1] - 2025-01-06
+
+### 🐛 Bug Fixes
+
+#### **Common Metrics Consistency**
+- **Energy Unit Conversion**: Fixed energy_kwh field to properly convert from Wh to kWh (divide by 1000)
+- **Entity ID Sanitization**: Sanitized workflow and job names in entity_id by replacing special characters with underscores
+- **Location Detection**: Added intelligent location detection for GitHub-hosted runners (US East/Virginia)
+- **JSON Formatting**: Fixed location JSON to properly quote string values or use null
+
+#### **Data Consistency Improvements**
+- **Consistent Entity IDs**: All entity IDs now follow the format `org/repo-sanitized_workflow-sanitized_job-run_id`
+- **Accurate Energy Values**: Energy consumption now correctly displayed in kWh instead of Wh
+- **Location Data**: GitHub-hosted runners now show actual location instead of null values
+
+### 🔧 Technical Improvements
+- **Enhanced Location Detection**: Added timezone-based location detection for better geographic accuracy
+- **Improved Error Handling**: Better fallback values for energy calculations when bc is not available
+- **Sanitization Logic**: Robust character replacement for workflow and job names in entity IDs
+
+---
+
 ## [2.0.0] - 2024-01-15
 
 ### 🚀 Major Features
