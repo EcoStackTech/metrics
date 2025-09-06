@@ -51,7 +51,7 @@ jobs:
       
       # Place at the end to capture true pipeline metrics
       - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v2.0.0
+        uses: EcoStackTech/metrics@v8.1.2
 ```
 
 > **💡 Simple & Smart**: The action works out of the box with sensible defaults. For advanced configuration options, see the [Organization Setup Guide](docs/organization-setup.md).
@@ -76,7 +76,7 @@ jobs:
       
       # Enhanced metrics with custom configuration
       - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v2.0.0
+        uses: EcoStackTech/metrics@v8.1.2
         with:
           include_system_stats: true
           capture_pipeline_metrics: true
@@ -216,18 +216,18 @@ The action collects raw energy consumption data (`energy_kwh`) and sends it to t
 ```yaml
 # ✅ Recommended: Capture entire pipeline
 - name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v2.0.0
+  uses: EcoStackTech/metrics@v8.1.2
 
 # ❌ Avoid: Only measures action time
 - name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v2.0.0
+  uses: EcoStackTech/metrics@v8.1.2
   # ... other steps after this
 ```
 
 ### 2. **Enable Enhanced Metrics**
 ```yaml
 - name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v2.0.0
+  uses: EcoStackTech/metrics@v8.1.2
   with:
     include_system_stats: true      # Resource monitoring
     capture_pipeline_metrics: true  # Pipeline duration tracking

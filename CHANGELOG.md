@@ -161,13 +161,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
    uses: EcoStackTech/metrics@v1
    
    # New
-   uses: EcoStackTech/metrics@v2.0.0
+   uses: EcoStackTech/metrics@v8.1.2
    ```
 
 2. **Review New Inputs**:
    ```yaml
    - name: Measure Carbon Footprint
-     uses: EcoStackTech/metrics@v2.0.0
+     uses: EcoStackTech/metrics@v8.1.2
      with:
        include_system_stats: true
        capture_pipeline_metrics: true  # New input

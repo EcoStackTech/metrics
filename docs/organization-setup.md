@@ -70,7 +70,7 @@ jobs:
       
       # 🌱 MEASURE CARBON FOOTPRINT
       - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v2.0.0
+        uses: EcoStackTech/metrics@v8.1.2
         with:
           include_system_stats: ${{ inputs.include_system_stats }}
           capture_pipeline_metrics: ${{ inputs.capture_pipeline_metrics }}
@@ -132,7 +132,7 @@ For users who need fine-grained control, the action supports these input paramet
 
 ```yaml
 - name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v2.0.0
+  uses: EcoStackTech/metrics@v8.1.2
   with:
     include_system_stats: false      # Skip detailed system monitoring
     capture_pipeline_metrics: true   # Keep pipeline duration tracking

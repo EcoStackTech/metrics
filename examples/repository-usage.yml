@@ -35,7 +35,7 @@ jobs:
       
       # 🌱 MEASURE CARBON FOOTPRINT - Place at the end for best results!
       - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v2.0.0
+        uses: EcoStackTech/metrics@v8.1.2
         # This action will:
         # • Measure the entire pipeline duration (from commit to completion)
         # • Collect energy consumption data for accurate carbon calculations

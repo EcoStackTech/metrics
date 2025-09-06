@@ -22,7 +22,7 @@ jobs:
       
       # 🌱 MEASURE CARBON FOOTPRINT - Core metrics collection
       - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v2.0.0
+        uses: EcoStackTech/metrics@v8.1.2
         # This action provides:
         # • True pipeline duration measurement (from commit/PR creation)
         # • Enhanced resource monitoring (CPU, memory, disk, network)

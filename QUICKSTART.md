@@ -18,7 +18,7 @@ jobs:
       
       # 🌱 Measure Carbon Footprint (place at the end!)
       - name: Measure Carbon Footprint
-        uses: EcoStackTech/metrics@v2.0.0
+        uses: EcoStackTech/metrics@v8.1.2
 ```
 
 **That's it!** The action will automatically:
@@ -33,18 +33,18 @@ jobs:
 ```yaml
 # ✅ RECOMMENDED: Capture entire pipeline
 - name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v2.0.0
+  uses: EcoStackTech/metrics@v8.1.2
 
 # ❌ AVOID: Only measures action time
 - name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v2.0.0
+  uses: EcoStackTech/metrics@v8.1.2
   # ... other steps after this
 ```
 
 ### **Enable Enhanced Features**
 ```yaml
 - name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v2.0.0
+  uses: EcoStackTech/metrics@v8.1.2
   with:
     include_system_stats: true      # Resource monitoring
     capture_pipeline_metrics: true  # Pipeline duration tracking
@@ -92,7 +92,7 @@ jobs:
 ### Conditional Collection
 ```yaml
 - name: Measure Carbon Footprint
-  uses: EcoStackTech/metrics@v2.0.0
+  uses: EcoStackTech/metrics@v8.1.2
   if: github.event_name == 'push'  # Only on pushes
 ```
 
