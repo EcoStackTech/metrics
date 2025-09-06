@@ -120,6 +120,51 @@ LOCATION_COUNTRY="${LOCATION_COUNTRY:-}"
 LOCATION_REGION="${LOCATION_REGION:-}"
 LOCATION_CITY="${LOCATION_CITY:-}"
 
+# Enhanced location detection for GitHub Actions runners
+if [[ -z "$LOCATION_COUNTRY" ]] && [[ -z "$LOCATION_REGION" ]] && [[ -z "$LOCATION_CITY" ]]; then
+    log "🌍 Attempting to detect runner location..." "DEBUG"
+    
+    # Try to detect location from runner labels or environment
+    if [[ "$RUNNER_LABELS" == *"ubuntu-latest"* ]] || [[ "$RUNNER_LABELS" == *"windows-latest"* ]] || [[ "$RUNNER_LABELS" == *"macos-latest"* ]]; then
+        # GitHub-hosted runners are typically in US East (Virginia)
+        LOCATION_COUNTRY="US"
+        LOCATION_REGION="us-east-1"
+        LOCATION_CITY="Virginia"
+        log "📍 Detected GitHub-hosted runner location: US East (Virginia)" "INFO"
+    elif [[ "$RUNNER_NAME" == *"self-hosted"* ]]; then
+        # For self-hosted runners, we can't determine location automatically
+        log "📍 Self-hosted runner detected - location unknown" "INFO"
+    else
+        # Try to detect from system timezone or other indicators
+        TIMEZONE=$(timedatectl show --property=Timezone --value 2>/dev/null || echo "")
+        if [[ -n "$TIMEZONE" ]]; then
+            case "$TIMEZONE" in
+                *"America/New_York"*|*"America/Chicago"*|*"America/Denver"*|*"America/Los_Angeles"*)
+                    LOCATION_COUNTRY="US"
+                    LOCATION_REGION="us-east-1"
+                    LOCATION_CITY="Unknown"
+                    log "📍 Detected US timezone: $TIMEZONE" "INFO"
+                    ;;
+                *"Europe/"*)
+                    LOCATION_COUNTRY="EU"
+                    LOCATION_REGION="eu-west-1"
+                    LOCATION_CITY="Unknown"
+                    log "📍 Detected European timezone: $TIMEZONE" "INFO"
+                    ;;
+                *"Asia/"*)
+                    LOCATION_COUNTRY="AS"
+                    LOCATION_REGION="ap-southeast-1"
+                    LOCATION_CITY="Unknown"
+                    log "📍 Detected Asian timezone: $TIMEZONE" "INFO"
+                    ;;
+                *)
+                    log "📍 Unknown timezone: $TIMEZONE" "DEBUG"
+                    ;;
+            esac
+        fi
+    fi
+fi
+
 # Initialize event timestamp variables (with defaults for local testing)
 EVENT_HEAD_COMMIT_TIMESTAMP="${EVENT_HEAD_COMMIT_TIMESTAMP:-}"
 EVENT_PULL_REQUEST_CREATED_AT="${EVENT_PULL_REQUEST_CREATED_AT:-}"
@@ -380,14 +425,14 @@ payload=$(cat <<JSON
     "collection_method": "action"
   },
   "common_metrics": {
-    "entity_id": "$REPO-$WORKFLOW-$JOB-$RUN_ID",
+    "entity_id": "$REPO-$(echo "$WORKFLOW" | sed 's/[^a-zA-Z0-9-]/_/g')-$(echo "$JOB" | sed 's/[^a-zA-Z0-9-]/_/g')-$RUN_ID",
     "entity_name": "$WORKFLOW - $JOB",
     "location": {
-      "country": ${LOCATION_COUNTRY:+$LOCATION_COUNTRY}${LOCATION_COUNTRY:-null},
-      "region": ${LOCATION_REGION:+$LOCATION_REGION}${LOCATION_REGION:-null},
-      "city": ${LOCATION_CITY:+$LOCATION_CITY}${LOCATION_CITY:-null}
+      "country": ${LOCATION_COUNTRY:+"\"$LOCATION_COUNTRY\""}${LOCATION_COUNTRY:-null},
+      "region": ${LOCATION_REGION:+"\"$LOCATION_REGION\""}${LOCATION_REGION:-null},
+      "city": ${LOCATION_CITY:+"\"$LOCATION_CITY\""}${LOCATION_CITY:-null}
     },
-    "energy_kwh": $FINAL_ENERGY_CONSUMPTION,
+    "energy_kwh": $(echo "scale=3; $FINAL_ENERGY_CONSUMPTION / 1000" | bc 2>/dev/null || echo "0"),
     "category": "ci_cd",
     "department": "engineering"
   },
