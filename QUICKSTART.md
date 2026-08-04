@@ -122,3 +122,5 @@ jobs:
 
 > Note: all duration metrics in the examples above are reported in milliseconds unless stated otherwise.
 (Applies to CSV and JSON exports alike.)
+
+Validation touch: metering fix live in prod (customer-agents#37).
