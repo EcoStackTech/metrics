@@ -126,3 +126,5 @@ jobs:
 Validation touch: metering fix live in prod (customer-agents#37).
 
 Second validation touch: dispatch payload fix live (customer-agents#38).
+
+Third validation touch: runner image ubuntu:24.04 fix live (customer-agents#39).
