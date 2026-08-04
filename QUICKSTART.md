@@ -124,3 +124,5 @@ jobs:
 (Applies to CSV and JSON exports alike.)
 
 Validation touch: metering fix live in prod (customer-agents#37).
+
+Second validation touch: dispatch payload fix live (customer-agents#38).
