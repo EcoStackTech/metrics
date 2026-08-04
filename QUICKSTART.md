@@ -121,3 +121,4 @@ jobs:
 **🌱 Ready to measure your environmental impact? Add the action to your workflow and start tracking sustainability today!**
 
 > Note: all duration metrics in the examples above are reported in milliseconds unless stated otherwise.
+(Applies to CSV and JSON exports alike.)
