@@ -130,3 +130,5 @@ Second validation touch: dispatch payload fix live (customer-agents#38).
 Third validation touch: runner image ubuntu:24.04 fix live (customer-agents#39).
 
 Fourth validation touch: App-token owner split live (customer-agents#40).
+
+Fifth validation touch: output capture + aws CLI fixes live (customer-agents#41, #42).
