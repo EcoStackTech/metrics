@@ -1,0 +1,16 @@
+# DEV validation of the BuildPulse open-source runner tier (metal-controller
+# PR #116). Lives only on this branch; the branch is deleted when done.
+name: oss-tier-dev
+on:
+  push:
+    branches: [oss-tier-dev]
+jobs:
+  run:
+    strategy:
+      matrix:
+        n: [1]
+    runs-on: development-bp-ubuntu-latest-x64-2x
+    steps:
+      - run: |
+          echo "phase=pre-seed repo=$GITHUB_REPOSITORY runner=$RUNNER_NAME nproc=$(nproc)"
+          sleep 45
