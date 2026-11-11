@@ -12,5 +12,5 @@ jobs:
     runs-on: development-bp-ubuntu-latest-x64-2x
     steps:
       - run: |
-          echo "phase=pre-seed repo=$GITHUB_REPOSITORY runner=$RUNNER_NAME nproc=$(nproc)"
+          echo "phase=allowlisted repo=$GITHUB_REPOSITORY runner=$RUNNER_NAME nproc=$(nproc)"
           sleep 45
