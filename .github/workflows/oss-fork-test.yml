@@ -1,0 +1,8 @@
+name: oss-fork-test
+on: [pull_request]
+jobs:
+  run:
+    runs-on: development-bp-ubuntu-latest-x64-2x
+    timeout-minutes: 10
+    steps:
+      - run: echo fork PR ran on BuildPulse runners
